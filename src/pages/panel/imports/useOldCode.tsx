@@ -1,36 +1,48 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { JSONEditor, Mode } from "vanilla-jsoneditor";
 
-function Console() {}
+type Tab =
+  | "tab-response"
+  | "tab-request"
+  | "tab-response-stats"
+  | "tab-request-stats"
+  | "tab-settings";
 
-Console.Type = {
-  LOG: "log",
-  DEBUG: "debug",
-  INFO: "info",
-  WARN: "warn",
-  ERROR: "error",
-  GROUP: "group",
-  GROUP_COLLAPSED: "groupCollapsed",
-  GROUP_END: "groupEnd",
-};
+export function useOldCode() {
+  const [activeTab, setActiveTab] = useState("");
+  const [showOriginal, setShowOriginal] = useState(false);
 
-Console.addMessage = function (type, format, ...args) {
-  chrome.runtime.sendMessage({
-    command: "sendToConsole",
-    tabId: chrome.devtools.inspectedWindow.tabId,
-    args: JSON.stringify(args),
-  });
-};
+  const onClear = () => {
+    console.log("onClear");
+    clear();
+  };
 
-// Generate Console output methods, i.e. Console.log(), Console.debug() etc.
-(function () {
-  const console_types = Object.getOwnPropertyNames(Console.Type);
-  for (let type = 0; type < console_types.length; ++type) {
-    const method_name = Console.Type[console_types[type]];
-    Console[method_name] = Console.addMessage.bind(Console, method_name);
-  }
-})();
+  const onDonwload = () => {
+    console.log("onDonwload");
+    const panel = currentDetailTab;
+    if (panel === "tab-response") {
+      var blob = new Blob([JSON.parse(JSON.stringify(activeCode, null, 4))], {
+        type: "application/json;charset=utf-8",
+      });
+      // saveAs(blob, "export_response.json");
+    } else {
+      try {
+        var blob = new Blob([JSON.stringify(activePostData)], {
+          type: "application/json;charset=utf-8",
+        });
+        // saveAs(blob, "export_request.json");
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  };
 
-function PanelController() {
+  const onToggleJsonParse = () => {
+    console.log("onToggleJsonParse");
+    setShowOriginal(!showOriginal);
+    selectDetailTab(currentDetailTab);
+  };
+
   const LOCALSTORAGE = window.localStorage;
   const MAXBODYSIZE = 20000;
   const HOST = "https://leviolson.com"; // "http://localhost:3000"
@@ -62,8 +74,7 @@ function PanelController() {
   let filteredRequests = [];
   const showAll = true;
   let limitNetworkRequests = false;
-  const showOriginal = false;
-  let currentDetailTab = "tab-response";
+  let currentDetailTab: Tab = "tab-response";
   let showIncomingRequests = true;
   const autoJSONParseDepthRes = 3;
   const autoJSONParseDepthReq = 6;
@@ -77,35 +88,38 @@ function PanelController() {
   let activeResponseCookies = [];
   let activeResponseHeaders = [];
   let activeCode = null;
-  let responseJsonEditor;
-  let requestJsonEditor;
+  let responseJsonEditor: JSONEditor;
+  let requestJsonEditor: JSONEditor;
 
   function init(type) {
-    $("#tabs").tabs();
-
     initChrome();
 
-    createToolbar();
-
-    const options = {
-      mode: "view",
-      modes: ["code", "view"],
-      onEditable: function (node) {
-        if (!node.path) {
-          // In modes code and text, node is empty: no path, field, or value
-          // returning false makes the text area read-only
-          return false;
-        }
-        return true;
+    const responseTarget = document.getElementById("response-jsoneditor");
+    const requestTarget = document.getElementById("request-jsoneditor");
+    responseJsonEditor = new JSONEditor({
+      target: responseTarget,
+      props: {
+        content: {
+          json: {
+            test: "response json yo",
+          },
+        },
+        readOnly: true,
       },
-    };
-    const response = document.getElementById("response-jsoneditor");
-    const request = document.getElementById("request-jsoneditor");
-    responseJsonEditor = new JSONEditor(response, options);
-    requestJsonEditor = new JSONEditor(request, options);
+    });
+    requestJsonEditor = new JSONEditor({
+      target: requestTarget,
+      props: {
+        content: {
+          text: "text yo",
+        },
+      },
+    });
 
-    $timeout(() => {
-      responseJsonEditor.set(CHANGELOG);
+    setTimeout(() => {
+      responseJsonEditor.set({
+        json: CHANGELOG,
+      });
       responseJsonEditor.expandAll();
     });
   }
@@ -265,53 +279,6 @@ function PanelController() {
     );
   }
 
-  function createToolbar() {
-    toolbar.createToggleButton(
-      "embed",
-      "Toggle JSON Parsing (See Panel Settings)",
-      false,
-      function () {
-        // ga('send', 'event', 'button', 'click', 'Toggle JSON Parsing');
-        $apply(function () {
-          showOriginal = !showOriginal;
-          selectDetailTab(currentDetailTab);
-          // displayCode();
-        });
-      },
-      true
-    );
-
-    toolbar.createButton("download3", "Download", false, function () {
-      // ga('send', 'event', 'button', 'click', 'Download');
-      $apply(function () {
-        const panel = currentDetailTab;
-        if (panel === "tab-response") {
-          var blob = new Blob(
-            [JSON.parse(JSON.stringify(activeCode, null, 4))],
-            { type: "application/json;charset=utf-8" }
-          );
-          saveAs(blob, "export_response.json");
-        } else {
-          try {
-            var blob = new Blob([JSON.stringify(activePostData)], {
-              type: "application/json;charset=utf-8",
-            });
-            saveAs(blob, "export_request.json");
-          } catch (e) {
-            console.log(e);
-          }
-        }
-      });
-    });
-
-    toolbar.createButton("blocked", "Clear", false, function () {
-      // ga('send', 'event', 'button', 'click', 'Clear');
-      clear();
-    });
-
-    $(".toolbar").replaceWith(toolbar.render());
-  }
-
   function addRequest(data, request_method, request_url, response_status) {
     const requestId = data.id || uniqueId;
     uniqueId++;
@@ -399,7 +366,7 @@ function PanelController() {
     activePostData = [];
     activeRequest = [];
     activeResponseData = [];
-    activeResponseDataPreview = "";
+    // activeResponseDataPreview = "";
     activeResponseCookies = [];
     activeResponseHeaders = [];
     activeCode = null;
@@ -416,7 +383,7 @@ function PanelController() {
     activePostData = requests[requestId].postData;
     activeRequest = requests[requestId].request_data;
     activeResponseData = requests[requestId].response_data;
-    activeResponseDataPreview = requests[requestId].response_data.response_body;
+    // activeResponseDataPreview = requests[requestId].response_data.response_body;
     activeResponseCookies = requests[requestId].response_cookies;
     activeResponseHeaders = requests[requestId].response_headers;
     activeCode = requests[requestId].response_data.response_body;
@@ -442,7 +409,7 @@ function PanelController() {
       return keypairs;
     }
 
-    $.each(data, function (key, value) {
+    data.forEach((key, value) => {
       if (!(value instanceof Object)) {
         keypairs.push({
           name: key,
@@ -476,28 +443,75 @@ function PanelController() {
       responseJsonEditor.set(null);
       requestJsonEditor.set(null);
     }
-    displayCode("responseJsonEditor", activeCode, autoJSONParseDepthRes);
-    displayCode("requestJsonEditor", activePostData, autoJSONParseDepthReq);
+    displayCode(responseJsonEditor, activeCode, autoJSONParseDepthRes, true);
+    displayCode(
+      requestJsonEditor,
+      activePostData,
+      autoJSONParseDepthReq,
+      false
+    );
   }, [activeCode]);
 
   useEffect(() => {
     _setLocalStorage();
   }, [showIncomingRequests]);
 
-  function selectDetailTab(tabId, external) {
+  function selectDetailTab(tabId: Tab, external = false) {
     currentDetailTab = tabId;
     if (external) {
-      $("#tabs a[href='#" + tabId + "']").trigger("click");
+      setActiveTab(tabId);
     }
     if (tabId === "tab-response") {
-      displayCode("responseJsonEditor", activeCode, 3);
+      displayCode(responseJsonEditor, activeCode, 3, true);
     }
     if (tabId === "tab-request") {
-      displayCode("requestJsonEditor", activePostData, 6);
+      displayCode(requestJsonEditor, activePostData, 6, false);
     }
   }
 
-  function displayCode(elementId, input, depth) {
+  function parse(input: unknown, level: number, depthOverride: number) {
+    const depth = depthOverride || 3;
+    if (level > depth) return input;
+
+    if (!input || typeof input === "number" || typeof input === "boolean") {
+      return input;
+    }
+
+    if (Array.isArray(input)) {
+      // loop and parse each node
+      for (let i = 0; i < input.length; i++) {
+        input[i] = parse(input[i], level ? level + 1 : 1, depth);
+      }
+      return input;
+    }
+
+    if (typeof input === "string") {
+      try {
+        input = parse(JSON.parse(input), level ? level + 1 : 1, depth);
+        return input;
+      } catch (e) {
+        // not a stringified node
+        return input;
+      }
+    } else if (typeof input === "object") {
+      Object.keys(input).forEach(function (item) {
+        input[item] = parse(input[item], level ? level + 1 : 1, depth);
+        return item;
+      });
+    } else {
+      // unless there is a datatype I'm not checking for....
+      // console.log('shouldnt get here')
+    }
+
+    return input;
+  }
+
+  function displayCode(
+    jsonEditor: JSONEditor,
+    input,
+    depth,
+    isResponse: boolean
+  ) {
     if (input) {
       let content;
       if (showOriginal) {
@@ -508,43 +522,47 @@ function PanelController() {
 
       if (typeof input === "object" || Array.isArray(input)) {
         // JSON
-        $scope[elementId].setMode("view");
-        $scope[elementId].set(content);
+        jsonEditor.updateProps({ mode: "view" as Mode });
+        jsonEditor.update({ text: content });
       } else {
         // Something else
         try {
           const json = JSON.parse(input);
-          $scope[elementId].setMode("view");
-          $scope[elementId].set(content);
+          jsonEditor.updateProps({ mode: "view" as Mode });
+          jsonEditor.update({
+            text: content,
+          });
         } catch (e) {
-          $scope[elementId].setMode("code");
-          $scope[elementId].set(content);
+          jsonEditor.updateProps({ mode: "code" as Mode });
+          jsonEditor.update({ text: content });
         }
       }
 
-      if (elementId === "responseJsonEditor") {
-        var bodySize = activeResponseData.find((x) => x.name === "bodySize");
+      if (isResponse) {
+        const bodySize = activeResponseData.find((x) => x.name === "bodySize");
         if (bodySize && bodySize.value < MAXBODYSIZE) {
           // an arbitrary number that I picked so there is HUGE lag
           if (
-            $scope[elementId].getMode() === "tree" ||
-            $scope[elementId].getMode() === "view"
+            jsonEditor.getMode() === "tree" ||
+            jsonEditor.getMode() === "view"
           )
-            $scope[elementId].expandAll();
+            jsonEditor.expandAll();
         }
-      } else if (elementId === "requestJsonEditor") {
-        var bodySize = activeRequest.find((x) => x.name === "bodySize");
+      } else {
+        const bodySize = activeRequest.find((x) => x.name === "bodySize");
         if (bodySize && bodySize.value < MAXBODYSIZE) {
           if (
-            $scope[elementId].getMode() === "tree" ||
-            $scope[elementId].getMode() === "view"
+            jsonEditor.getMode() === "tree" ||
+            jsonEditor.getMode() === "view"
           )
-            $scope[elementId].expandAll();
+            jsonEditor.expandAll();
         }
       }
     } else {
-      $scope[elementId].set(null);
-      $scope[elementId].expandAll();
+      jsonEditor.update(null);
+      jsonEditor.expandAll();
     }
   }
+
+  return { onClear, onDonwload, onToggleJsonParse };
 }

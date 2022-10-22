@@ -1,11 +1,16 @@
-import React from "react";
+import { FC } from "react";
 import "@pages/panel/Panel.css";
+import { Toolbar } from "./imports/Toolbar";
 
-const Panel: React.FC = () => {
+const Panel: FC = () => {
   return (
-    <div className="container">
-      <h1>Dev Tools Panel</h1>
-    </div>
+    <>
+      <div className="container">
+        <h1>Dev Tools Panel</h1>
+      </div>
+
+      <Toolbar />
+    </>
   );
 };
 
