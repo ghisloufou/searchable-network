@@ -9,6 +9,8 @@
   },
   "scripts": {
     "build": "tsc --noEmit && vite build",
+    "buildw": "vite build -w",
+    "typew": "tsc --noEmit -w --pretty",
     "build:hmr": "rollup --config utils/reload/rollup.config.ts",
     "wss": "node utils/reload/initReloadServer.js",
     "dev": "yarn build:hmr && (yarn wss & nodemon)",

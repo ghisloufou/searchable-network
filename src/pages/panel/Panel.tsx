@@ -1,17 +1,16 @@
 import { FC } from "react";
-import "@pages/panel/Panel.css";
+import "./Panel.css";
 import { Toolbar } from "./imports/Toolbar";
 
-const Panel: FC = () => {
+export const Panel: FC = () => {
   return (
     <>
+      <h1>Salut salut</h1>
       <div className="container">
         <h1>Dev Tools Panel</h1>
       </div>
 
-      <Toolbar />
+      {/* <Toolbar /> */}
     </>
   );
 };
-
-export default Panel;
