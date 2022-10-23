@@ -1,6 +1,6 @@
 {
   "name": "better-better-network-panel",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A chrome extension to better search in the network payloads and responses",
   "license": "MIT",
   "repository": {
