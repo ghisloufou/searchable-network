@@ -25,3 +25,4 @@ then press ctrl+shif+i to open devtools in devtools
 ## Thanks To
 
 | [Jonghakseo/chrome-extension-boilerplate-react-vite](https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite)
+| [leothelocust/better-network-chrome-panel](https://github.com/leothelocust/better-network-chrome-panel)
