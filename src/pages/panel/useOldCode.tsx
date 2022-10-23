@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { JSONEditor, Mode } from "vanilla-jsoneditor";
+import JSONEditor, { JSONEditorOptions, EditableNode } from "jsoneditor";
 
 type Tab =
   | "tab-response"
@@ -91,35 +91,46 @@ export function useOldCode() {
   let responseJsonEditor: JSONEditor;
   let requestJsonEditor: JSONEditor;
 
-  function init(type) {
+  useEffect(() => {
+    init();
+  }, []);
+
+  function init() {
     initChrome();
 
     const responseTarget = document.getElementById("response-jsoneditor");
     const requestTarget = document.getElementById("request-jsoneditor");
-    responseJsonEditor = new JSONEditor({
-      target: responseTarget,
-      props: {
-        content: {
-          json: {
-            test: "response json yo",
-          },
-        },
-        readOnly: true,
+
+    const options: JSONEditorOptions = {
+      mode: "view",
+      modes: ["code", "view"],
+      onEditable: (node) => {
+        if (!(node as EditableNode).path) {
+          // In modes code and text, node is empty: no path, field, or value
+          // returning false makes the text area read-only
+          return false;
+        }
+        return true;
       },
-    });
-    requestJsonEditor = new JSONEditor({
-      target: requestTarget,
-      props: {
-        content: {
-          text: "text yo",
-        },
-      },
-    });
+    };
+
+    // responseJsonEditor = new JSONEditor({
+    //   target: responseTarget,
+    //   props: {
+    //     content: {
+    //       json: {
+    //         test: CHANGELOG,
+    //       },
+    //     },
+    //     readOnly: true,
+    //   },
+    // });
+
+    responseJsonEditor = new JSONEditor(responseTarget, options);
+    requestJsonEditor = new JSONEditor(requestTarget, options);
 
     setTimeout(() => {
-      responseJsonEditor.set({
-        json: CHANGELOG,
-      });
+      responseJsonEditor.update(CHANGELOG);
       responseJsonEditor.expandAll();
     });
   }
@@ -440,8 +451,8 @@ export function useOldCode() {
 
   useEffect(() => {
     if (activeCode === null) {
-      responseJsonEditor.set(null);
-      requestJsonEditor.set(null);
+      responseJsonEditor.update(null);
+      requestJsonEditor.update(null);
     }
     displayCode(responseJsonEditor, activeCode, autoJSONParseDepthRes, true);
     displayCode(
@@ -522,19 +533,17 @@ export function useOldCode() {
 
       if (typeof input === "object" || Array.isArray(input)) {
         // JSON
-        jsonEditor.updateProps({ mode: "view" as Mode });
-        jsonEditor.update({ text: content });
+        jsonEditor.setMode("view");
+        jsonEditor.update(content);
       } else {
         // Something else
         try {
           const json = JSON.parse(input);
-          jsonEditor.updateProps({ mode: "view" as Mode });
-          jsonEditor.update({
-            text: content,
-          });
+          jsonEditor.setMode("view");
+          jsonEditor.update(json);
         } catch (e) {
-          jsonEditor.updateProps({ mode: "code" as Mode });
-          jsonEditor.update({ text: content });
+          jsonEditor.setMode("code");
+          jsonEditor.update(content);
         }
       }
 
@@ -564,5 +573,49 @@ export function useOldCode() {
     }
   }
 
-  return { onClear, onDonwload, onToggleJsonParse };
+  return {
+    // new func
+    onClear,
+    onDonwload,
+    onToggleJsonParse,
+    // Old func
+    filterRequests,
+    toggleSearchType,
+    customSearch,
+    addSearchTerm,
+    removeSearchTerm,
+    deleteSearchTerm,
+    setActive,
+    getClass,
+    titleIfSeparator,
+    // Old data
+    search,
+    setSearch,
+    searchTerms,
+    oldSearchTerms,
+    andFilter,
+    uniqueId,
+    activeId,
+    requests,
+    masterRequests,
+    filteredRequests,
+    showAll,
+    limitNetworkRequests,
+    currentDetailTab,
+    showIncomingRequests,
+    autoJSONParseDepthRes,
+    autoJSONParseDepthReq,
+    filter,
+    editor,
+    activeCookies,
+    activeHeaders,
+    activePostData,
+    activeRequest,
+    activeResponseData,
+    activeResponseCookies,
+    activeResponseHeaders,
+    activeCode,
+    responseJsonEditor,
+    requestJsonEditor,
+  };
 }
