@@ -6,7 +6,6 @@ import "./panel.scss";
 export const Panel: React.FC = () => {
   const {
     onClear,
-    onDonwload,
     onToggleJsonParse,
     filterRequests,
     toggleSearchType,
@@ -30,7 +29,6 @@ export const Panel: React.FC = () => {
     filteredRequests,
     showAll,
     limitNetworkRequests,
-    currentDetailTab,
     showIncomingRequests,
     setShowIncomingRequests,
     autoJSONParseDepthRes,
@@ -490,11 +488,7 @@ export const Panel: React.FC = () => {
           </section>
         </section>
 
-        <Toolbar
-          onToggleJsonParse={onToggleJsonParse}
-          onDonwload={onDonwload}
-          onClear={onClear}
-        />
+        <Toolbar onToggleJsonParse={onToggleJsonParse} onClear={onClear} />
       </div>
     </>
   );

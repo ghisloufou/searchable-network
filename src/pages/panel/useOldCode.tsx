@@ -9,75 +9,77 @@ export type Tab =
   | "tab-settings";
 
 export function useOldCode() {
-  const [activeTab, setActiveTab] = useState<Tab>("tab-request");
+  const [activeTab, setActiveTab] = useState<Tab>("tab-response");
   const [search, setSearch] = useState("");
   const [showOriginal, setShowOriginal] = useState(false);
   const [showIncomingRequests, setShowIncomingRequests] = useState(true);
+  const [searchTerms, setSearchTerms] = useState([]);
+  const [oldSearchTerms, setOldSearchTerms] = useState([]);
+  const [andFilter, setAndFilter] = useState(true);
+  const [uniqueId, setUniqueId] = useState(100000);
+  const [activeId, setActiveId] = useState(null);
+  const [requests, setRequests] = useState({});
+  const [masterRequests, setMasterRequests] = useState([]);
+  const [filteredRequests, setFilteredRequests] = useState([]);
+  const [responseJsonEditor, setResponseJsonEditor] = useState<JSONEditor>();
+  const [requestJsonEditor, setRequestJsonEditor] = useState<JSONEditor>();
 
-  const onClear = () => {
-    console.log("onClear");
-    clear();
-  };
-
-  const onDonwload = () => {
-    console.log("onDonwload");
-    const panel = currentDetailTab;
-    if (panel === "tab-response") {
-      var blob = new Blob([JSON.parse(JSON.stringify(activeCode, null, 4))], {
-        type: "application/json;charset=utf-8",
-      });
-      // saveAs(blob, "export_response.json");
-    } else {
-      try {
-        var blob = new Blob([JSON.stringify(activePostData)], {
-          type: "application/json;charset=utf-8",
-        });
-        // saveAs(blob, "export_request.json");
-      } catch (e) {
-        console.log(e);
-      }
-    }
-  };
-
-  const onToggleJsonParse = () => {
-    console.log("onToggleJsonParse");
-    setShowOriginal(!showOriginal);
-    selectDetailTab(currentDetailTab);
-  };
+  const [activeCookies, setActiveCookies] = useState([]);
+  const [activeHeaders, setActiveHeaders] = useState([]);
+  const [activePostData, setActivePostData] = useState([]);
+  const [activeRequest, setActiveRequest] = useState([]);
+  const [activeResponseData, setActiveResponseData] = useState([]);
+  const [activeResponseCookies, setActiveResponseCookies] = useState([]);
+  const [activeResponseHeaders, setActiveResponseHeaders] = useState([]);
+  const [activeCode, setActiveCode] = useState(null);
 
   const LOCALSTORAGE = window.localStorage;
   const MAXBODYSIZE = 20000;
-  const defaultJSON = {
-    test: {
-      test2: "yo",
+  const DEFAULTJSON = {
+    default: {
+      json: "example",
     },
   };
-
-  let searchTerms = [];
-  let oldSearchTerms = [];
-  let andFilter = true;
-  let uniqueId = 100000;
-  let activeId = null;
-  let requests = {};
-  let masterRequests = [];
-  let filteredRequests = [];
+  const limitNetworkRequests = true;
   const showAll = true;
-  let limitNetworkRequests = false;
-  let currentDetailTab: Tab = "tab-response";
   const autoJSONParseDepthRes = 3;
   const autoJSONParseDepthReq = 6;
   const filter = "";
   const editor = null;
-  let activeCookies = [];
-  let activeHeaders = [];
-  let activePostData = [];
-  let activeRequest = [];
-  let activeResponseData = [];
-  let activeResponseCookies = [];
-  let activeResponseHeaders = [];
-  let activeCode = null;
-  let responseJsonEditor: JSONEditor;
-  let requestJsonEditor: JSONEditor;
+
+  const onToggleJsonParse = () => {
+    setShowOriginal(!showOriginal);
+    selectDetailTab(activeTab);
+  };
+
+  const onClear = () => {
+    clear();
+  };
+
+  useEffect(() => {
+    if (responseJsonEditor) {
+      responseJsonEditor.update(DEFAULTJSON);
+      responseJsonEditor.expandAll();
+    }
+  }, [responseJsonEditor]);
+
+  useEffect(() => {
+    if (activeCode === null && responseJsonEditor && requestJsonEditor) {
+      responseJsonEditor.update(null);
+      requestJsonEditor.update(null);
+    }
+    displayCode(responseJsonEditor, activeCode, autoJSONParseDepthRes, true);
+    displayCode(
+      requestJsonEditor,
+      activePostData,
+      autoJSONParseDepthReq,
+      false
+    );
+  }, [activeCode]);
+
+  useEffect(() => {
+    _setLocalStorage();
+  }, [showIncomingRequests]);
 
   useEffect(() => {
     init();
@@ -114,13 +116,8 @@ export function useOldCode() {
     //   },
     // });
 
-    responseJsonEditor = new JSONEditor(responseTarget, options);
-    requestJsonEditor = new JSONEditor(requestTarget, options);
-
-    setTimeout(() => {
-      responseJsonEditor.update(defaultJSON);
-      responseJsonEditor.expandAll();
-    });
+    setResponseJsonEditor(new JSONEditor(responseTarget, options));
+    setRequestJsonEditor(new JSONEditor(requestTarget, options));
   }
 
   const getLSItem = (key: string) => {
@@ -129,21 +126,21 @@ export function useOldCode() {
 
   function initChrome() {
     try {
-      oldSearchTerms = getLSItem("bnp-oldsearchterms") || [];
+      setOldSearchTerms(getLSItem("bnp-oldsearchterms") || []);
     } catch (e) {
-      oldSearchTerms = [];
+      setOldSearchTerms([]);
     }
 
     try {
-      searchTerms = getLSItem("bnp-searchterms") || [];
+      setSearchTerms(getLSItem("bnp-searchterms") || []);
     } catch (e) {
-      searchTerms = [];
+      setSearchTerms([]);
     }
 
     try {
-      andFilter = getLSItem("bnp-andfilter") || false;
+      setAndFilter(getLSItem("bnp-andfilter") || false);
     } catch (e) {
-      andFilter = false;
+      setAndFilter(false);
     }
 
     try {
@@ -154,7 +151,7 @@ export function useOldCode() {
 
     console.debug("Retrieving Settings from Local Storage");
 
-    chrome.devtools.network.onRequestFinished.addListener(function (request) {
+    chrome.devtools.network.onRequestFinished.addListener((request) => {
       // do not show requests to chrome extension resources
       if (request.request.url.startsWith("chrome-extension://")) {
         return;
@@ -162,38 +159,47 @@ export function useOldCode() {
       handleRequest(request);
     });
 
-    chrome.devtools.network.onNavigated.addListener(function (event) {
+    chrome.devtools.network.onNavigated.addListener((event) => {
       // display a line break in the network logs to show page reloaded
-      masterRequests.push({
-        id: uniqueId,
-        separator: true,
-        event: event,
-      });
-      uniqueId++;
+      setMasterRequests((masterRequests) =>
+        masterRequests.concat({
+          id: uniqueId,
+          separator: true,
+          event: event,
+        })
+      );
+      setUniqueId((uniqueId) => uniqueId++);
       cleanRequests();
     });
   }
 
   function filterRequests() {
     if (!searchTerms || searchTerms.length === 0) {
-      filteredRequests = masterRequests;
+      setFilteredRequests(masterRequests);
       return;
     }
-    // console.log("Filtering for: ", searchTerms);
+    console.log("Filtering for: ", searchTerms);
 
     const negTerms = [];
     const posTerms = [];
     for (let term of searchTerms) {
       term = term.toLowerCase();
-      if (term && term[0] === "-") negTerms.push(term.substring(1));
-      else posTerms.push(term);
+      if (term && term[0] === "-") {
+        negTerms.push(term.substring(1));
+      } else {
+        posTerms.push(term);
+      }
     }
 
-    filteredRequests = masterRequests.filter(function (x) {
-      if (x.separator) return true;
+    const newFilteredRequests = masterRequests.filter((x) => {
+      if (x.separator) {
+        return true;
+      }
       for (const term of negTerms) {
         // if neg
-        if (x && x.searchIndex && x.searchIndex.includes(term)) return false;
+        if (x && x.searchIndex && x.searchIndex.includes(term)) {
+          return false;
+        }
       }
 
       if (andFilter) {
@@ -216,17 +222,19 @@ export function useOldCode() {
         return false;
       }
     });
+
+    setFilteredRequests(newFilteredRequests);
   }
 
   function toggleSearchType() {
-    andFilter = !andFilter;
+    setAndFilter((andFilter) => !andFilter);
     _setLocalStorage();
     filterRequests();
   }
 
   function customSearch() {
     if (!searchTerms.includes(search)) {
-      searchTerms.push(search);
+      setSearchTerms((st) => st.concat(search));
       setSearch("");
       _setLocalStorage();
       filterRequests();
@@ -243,31 +251,32 @@ export function useOldCode() {
     LOCALSTORAGE.setItem("bnp-andfilter", JSON.stringify(andFilter));
     LOCALSTORAGE.setItem("bnp-searchterms", JSON.stringify(searchTerms));
     LOCALSTORAGE.setItem("bnp-oldsearchterms", JSON.stringify(oldSearchTerms));
-    console.debug("_setLocalStorage");
-    console.debug("showIncomingRequests", showIncomingRequests);
-    console.debug("andFilter", andFilter);
-    console.debug("searchTerms", searchTerms);
-    console.debug("oldSearchTerms", oldSearchTerms);
   }
 
-  function addSearchTerm(index) {
-    searchTerms.push(oldSearchTerms.splice(index, 1)[0]);
+  function addSearchTerm(index: number) {
+    setSearchTerms((searchTerm) => searchTerm.concat(oldSearchTerms[index]));
+    setOldSearchTerms((oldSearchTerm) =>
+      oldSearchTerm.filter((_, i) => i !== index)
+    );
     _setLocalStorage();
     filterRequests();
   }
 
-  function removeSearchTerm(index) {
-    oldSearchTerms.push(searchTerms.splice(index, 1)[0]);
+  function removeSearchTerm(index: number) {
+    setOldSearchTerms((oldSearchTerm) =>
+      oldSearchTerm.concat(searchTerms[index])
+    );
+    setSearchTerms((searchTerm) => searchTerm.filter((_, i) => i !== index));
     _setLocalStorage();
     filterRequests();
   }
 
-  function deleteSearchTerm(index) {
-    oldSearchTerms.splice(index, 1);
+  function deleteSearchTerm(index: number) {
+    setOldSearchTerms(oldSearchTerms.filter((_, i) => i !== index));
     _setLocalStorage();
   }
 
-  function handleRequest(har_entry) {
+  function handleRequest(har_entry: chrome.devtools.network.Request) {
     addRequest(
       har_entry,
       har_entry.request.method,
@@ -276,9 +285,14 @@ export function useOldCode() {
     );
   }
 
-  function addRequest(data, request_method, request_url, response_status) {
+  function addRequest(
+    data, // data: chrome.devtools.network.Request
+    request_method: string,
+    request_url: string | string[],
+    response_status: number
+  ) {
     const requestId = data.id || uniqueId;
-    uniqueId++;
+    setUniqueId((uniqueId) => uniqueId++);
 
     if (data.request != null) {
       data["request_data"] = createKeypairs(data.request);
@@ -328,25 +342,36 @@ export function useOldCode() {
     const ctObj = data.response_headers.find((x) => x.name == "Content-Type");
     data.content_type = (ctObj && ctObj.value) || null;
 
-    requests[requestId] = data; // master
-    data.searchIndex = JSON.stringify(data.request).toLowerCase();
-    masterRequests.push(data);
+    setRequests((requests) => {
+      requests[requestId] = data;
+      return requests;
+    });
 
-    data.getContent(function (content, encoding) {
-      requests[requestId].response_data.response_body = content;
+    data.searchIndex = JSON.stringify(data.request).toLowerCase();
+    setMasterRequests((masterRequests) => masterRequests.concat(data));
+
+    data.getContent((content, encoding) => {
+      setRequests((requests) => {
+        requests[requestId].response_data.response_body = content;
+        return requests;
+      });
     });
 
     cleanRequests();
   }
 
   function cleanRequests() {
-    console.log("cleanRequests");
     if (limitNetworkRequests === true) {
-      if (masterRequests.length >= 500) masterRequests.shift();
+      if (masterRequests.length >= 500) {
+        setMasterRequests((masterRequests) => masterRequests.shift());
+      }
       const keys = Object.keys(requests).reverse().slice(500);
       keys.forEach(function (key) {
         if (requests[key]) {
-          delete requests[key];
+          setRequests((requests) => {
+            delete requests[key];
+            return requests;
+          });
         }
       });
     }
@@ -354,37 +379,37 @@ export function useOldCode() {
   }
 
   function clear() {
-    requests = {};
-    activeId = null;
-    masterRequests = [];
-    filteredRequests = [];
+    setRequests({});
+    setActiveId(null);
+    setMasterRequests([]);
+    setFilteredRequests([]);
 
-    activeCookies = [];
-    activeHeaders = [];
-    activePostData = [];
-    activeRequest = [];
-    activeResponseData = [];
+    setActiveCookies([]);
+    setActiveHeaders([]);
+    setActivePostData([]);
+    setActiveRequest([]);
+    setActiveResponseData([]);
     // activeResponseDataPreview = "";
-    activeResponseCookies = [];
-    activeResponseHeaders = [];
-    activeCode = null;
+    setActiveResponseCookies([]);
+    setActiveResponseHeaders([]);
+    setActiveCode(null);
   }
 
-  function setActive(requestId) {
+  function setActive(requestId: string) {
     if (!requests[requestId]) {
       return;
     }
-    activeId = requestId;
+    setActiveId(requestId);
 
-    activeCookies = requests[requestId].cookies;
-    activeHeaders = requests[requestId].headers;
-    activePostData = requests[requestId].postData;
-    activeRequest = requests[requestId].request_data;
-    activeResponseData = requests[requestId].response_data;
+    setActiveCookies(requests[requestId].cookies);
+    setActiveHeaders(requests[requestId].headers);
+    setActivePostData(requests[requestId].postData);
+    setActiveRequest(requests[requestId].request_data);
+    setActiveResponseData(requests[requestId].response_data);
     // activeResponseDataPreview = requests[requestId].response_data.response_body;
-    activeResponseCookies = requests[requestId].response_cookies;
-    activeResponseHeaders = requests[requestId].response_headers;
-    activeCode = requests[requestId].response_data.response_body;
+    setActiveResponseCookies(requests[requestId].response_cookies);
+    setActiveResponseHeaders(requests[requestId].response_headers);
+    setActiveCode(requests[requestId].response_data.response_body);
   }
 
   function getClass(requestId, separator) {
@@ -407,7 +432,6 @@ export function useOldCode() {
       return keypairs;
     }
 
-    console.log("createKeypairs", data);
     data.forEach((key, value) => {
       if (!(value instanceof Object)) {
         keypairs.push({
@@ -427,7 +451,6 @@ export function useOldCode() {
       return keypairs;
     }
 
-    console.log("createKeypairsDeep");
     data.forEach((key, value) => {
       keypairs.push({
         name: value.name,
@@ -437,24 +460,6 @@ export function useOldCode() {
 
     return keypairs;
   }
-
-  useEffect(() => {
-    if (activeCode === null) {
-      responseJsonEditor.update(null);
-      requestJsonEditor.update(null);
-    }
-    displayCode(responseJsonEditor, activeCode, autoJSONParseDepthRes, true);
-    displayCode(
-      requestJsonEditor,
-      activePostData,
-      autoJSONParseDepthReq,
-      false
-    );
-  }, [activeCode]);
-
-  useEffect(() => {
-    _setLocalStorage();
-  }, [showIncomingRequests]);
 
   function selectDetailTab(tabId: Tab) {
     setActiveTab(tabId);
@@ -491,7 +496,6 @@ export function useOldCode() {
         return input;
       }
     } else if (typeof input === "object") {
-      console.log("parse");
       Object.keys(input).forEach(function (item) {
         input[item] = parse(input[item], level ? level + 1 : 1, depth);
         return item;
@@ -510,6 +514,9 @@ export function useOldCode() {
     depth,
     isResponse: boolean
   ) {
+    if (!jsonEditor) {
+      return;
+    }
     if (input) {
       let content;
       if (showOriginal) {
@@ -562,9 +569,8 @@ export function useOldCode() {
 
   return {
     // new func
-    onClear,
-    onDonwload,
     onToggleJsonParse,
+    onClear,
     activeTab,
     // Old func
     filterRequests,
@@ -590,7 +596,6 @@ export function useOldCode() {
     filteredRequests,
     showAll,
     limitNetworkRequests,
-    currentDetailTab,
     showIncomingRequests,
     setShowIncomingRequests,
     autoJSONParseDepthRes,

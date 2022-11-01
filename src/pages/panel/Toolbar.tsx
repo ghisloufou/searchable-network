@@ -1,14 +1,9 @@
 type ToolbarProps = {
   onToggleJsonParse: () => void;
-  onDonwload: () => void;
   onClear: () => void;
 };
 
-export const Toolbar = ({
-  onToggleJsonParse,
-  onDonwload,
-  onClear,
-}: ToolbarProps) => {
+export const Toolbar = ({ onToggleJsonParse, onClear }: ToolbarProps) => {
   return (
     <>
       <a href="#">
@@ -25,11 +20,6 @@ export const Toolbar = ({
           />
         </label>
       </a>
-
-      <button title="Download" onClick={onDonwload}>
-        Download
-        <i className="icon-download3"></i>
-      </button>
 
       <button title="Clear" onClick={onClear}>
         Clear
