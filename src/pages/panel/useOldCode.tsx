@@ -9,7 +9,7 @@ export type Tab =
   | "tab-settings";
 
 export function useOldCode() {
-  const [activeTab, setActiveTab] = useState("");
+  const [activeTab, setActiveTab] = useState<Tab>("tab-request");
   const [search, setSearch] = useState("");
   const [showOriginal, setShowOriginal] = useState(false);
   const [showIncomingRequests, setShowIncomingRequests] = useState(true);
@@ -47,7 +47,6 @@ export function useOldCode() {
 
   const LOCALSTORAGE = window.localStorage;
   const MAXBODYSIZE = 20000;
-  const HOST = "https://leviolson.com"; // "http://localhost:3000"
   const defaultJSON = {
     test: {
       test2: "yo",
@@ -244,13 +243,11 @@ export function useOldCode() {
     LOCALSTORAGE.setItem("bnp-andfilter", JSON.stringify(andFilter));
     LOCALSTORAGE.setItem("bnp-searchterms", JSON.stringify(searchTerms));
     LOCALSTORAGE.setItem("bnp-oldsearchterms", JSON.stringify(oldSearchTerms));
-    console.debug(
-      "Saving",
-      showIncomingRequests,
-      andFilter,
-      searchTerms,
-      oldSearchTerms
-    );
+    console.debug("_setLocalStorage");
+    console.debug("showIncomingRequests", showIncomingRequests);
+    console.debug("andFilter", andFilter);
+    console.debug("searchTerms", searchTerms);
+    console.debug("oldSearchTerms", oldSearchTerms);
   }
 
   function addSearchTerm(index) {
@@ -343,6 +340,7 @@ export function useOldCode() {
   }
 
   function cleanRequests() {
+    console.log("cleanRequests");
     if (limitNetworkRequests === true) {
       if (masterRequests.length >= 500) masterRequests.shift();
       const keys = Object.keys(requests).reverse().slice(500);
@@ -409,6 +407,7 @@ export function useOldCode() {
       return keypairs;
     }
 
+    console.log("createKeypairs", data);
     data.forEach((key, value) => {
       if (!(value instanceof Object)) {
         keypairs.push({
@@ -428,6 +427,7 @@ export function useOldCode() {
       return keypairs;
     }
 
+    console.log("createKeypairsDeep");
     data.forEach((key, value) => {
       keypairs.push({
         name: value.name,
@@ -456,11 +456,8 @@ export function useOldCode() {
     _setLocalStorage();
   }, [showIncomingRequests]);
 
-  function selectDetailTab(tabId: Tab, external = false) {
-    currentDetailTab = tabId;
-    if (external) {
-      setActiveTab(tabId);
-    }
+  function selectDetailTab(tabId: Tab) {
+    setActiveTab(tabId);
     if (tabId === "tab-response") {
       displayCode(responseJsonEditor, activeCode, 3, true);
     }
@@ -494,6 +491,7 @@ export function useOldCode() {
         return input;
       }
     } else if (typeof input === "object") {
+      console.log("parse");
       Object.keys(input).forEach(function (item) {
         input[item] = parse(input[item], level ? level + 1 : 1, depth);
         return item;
@@ -567,6 +565,7 @@ export function useOldCode() {
     onClear,
     onDonwload,
     onToggleJsonParse,
+    activeTab,
     // Old func
     filterRequests,
     toggleSearchType,
@@ -608,5 +607,6 @@ export function useOldCode() {
     activeCode,
     responseJsonEditor,
     requestJsonEditor,
+    showOriginal,
   };
 }

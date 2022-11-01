@@ -1,7 +1,6 @@
 import React from "react";
 import { Toolbar } from "./Toolbar";
 import { Tab, useOldCode } from "./useOldCode";
-import "./Panel.css";
 import "./panel.scss";
 
 export const Panel: React.FC = () => {
@@ -48,6 +47,8 @@ export const Panel: React.FC = () => {
     activeCode,
     responseJsonEditor,
     requestJsonEditor,
+    showOriginal,
+    activeTab,
   } = useOldCode();
 
   const handleOldSearchClick = (e, index) => {
@@ -291,27 +292,27 @@ export const Panel: React.FC = () => {
                         className="tabbed-pane-header-tab-title"
                         onClick={() => selectDetailTab("tab-response")}
                       >
-                        <span ng-show="showOriginal">Raw</span>
-                        <span ng-hide="showOriginal">Formatted</span>
-                        Response
+                        <span>
+                          {showOriginal ? "Raw" : "Formatted"} Response
+                        </span>
                       </a>
                     </li>
                     <li className="tabbed-pane-header-tab">
                       <a
                         href="#tab-request"
                         className="tabbed-pane-header-tab-title"
-                        ng-click="selectDetailTab('tab-request')"
+                        onClick={() => selectDetailTab("tab-request")}
                       >
-                        <span ng-show="showOriginal">Raw</span>
-                        <span ng-hide="showOriginal">Formatted</span>
-                        Request
+                        <span>
+                          {showOriginal ? "Raw" : "Formatted"} Request
+                        </span>
                       </a>
                     </li>
                     <li className="tabbed-pane-header-tab">
                       <a
                         href="#tab-request-stats"
                         className="tabbed-pane-header-tab-title"
-                        ng-click="selectDetailTab('tab-request-stats')"
+                        onClick={() => selectDetailTab("tab-request-stats")}
                       >
                         Request
                       </a>
@@ -320,7 +321,7 @@ export const Panel: React.FC = () => {
                       <a
                         href="#tab-response-stats"
                         className="tabbed-pane-header-tab-title"
-                        ng-click="selectDetailTab('tab-response-stats')"
+                        onClick={() => selectDetailTab("tab-response-stats")}
                       >
                         Response
                       </a>
@@ -329,7 +330,7 @@ export const Panel: React.FC = () => {
                       <a
                         href="#tab-settings"
                         className="tabbed-pane-header-tab-title"
-                        ng-click="selectDetailTab('tab-settings')"
+                        onClick={() => selectDetailTab("tab-settings")}
                       >
                         Panel Settings
                       </a>
@@ -341,7 +342,12 @@ export const Panel: React.FC = () => {
               </div>
 
               <div className="tabbed-pane-content data-grid data-grid-details">
-                <div id="tab-request-stats">
+                <div
+                  id="tab-request-stats"
+                  style={{
+                    display: activeTab === "tab-request-stats" ? "" : "none",
+                  }}
+                >
                   {tabRequestStats
                     .filter(({ data }) => data.length)
                     .map(({ data, headerText, id, tab, title }) => (
@@ -353,9 +359,7 @@ export const Panel: React.FC = () => {
                         </thead>
                         <tbody>
                           {data.map((param) => (
-                            <tr
-                              onClick={() => tab && selectDetailTab(tab, true)}
-                            >
+                            <tr onClick={() => tab && selectDetailTab(tab)}>
                               <td className="key">{param.name}</td>
                               {/* <td><pretty-print data="param.value" /></td> */}
                               <td className="value">
@@ -368,7 +372,12 @@ export const Panel: React.FC = () => {
                     ))}
                 </div>
 
-                <div id="tab-response-stats">
+                <div
+                  id="tab-response-stats"
+                  style={{
+                    display: activeTab === "tab-response-stats" ? "" : "none",
+                  }}
+                >
                   {tabResponseStats
                     .filter(({ data }) => data.length)
                     .map(({ data, headerText, id, tab, title }) => (
@@ -380,9 +389,7 @@ export const Panel: React.FC = () => {
                         </thead>
                         <tbody>
                           {data.map((param) => (
-                            <tr
-                              onClick={() => tab && selectDetailTab(tab, true)}
-                            >
+                            <tr onClick={() => tab && selectDetailTab(tab)}>
                               <td className="key">{param.name}</td>
                               {/* <td><pretty-print data="param.value" /></td> */}
                               <td className="value">
@@ -395,15 +402,30 @@ export const Panel: React.FC = () => {
                     ))}
                 </div>
 
-                <div id="tab-response">
+                <div
+                  id="tab-response"
+                  style={{
+                    display: activeTab === "tab-response" ? "" : "none",
+                  }}
+                >
                   <div id="response-jsoneditor"></div>
                 </div>
 
-                <div id="tab-request">
+                <div
+                  id="tab-request"
+                  style={{
+                    display: activeTab === "tab-request" ? "" : "none",
+                  }}
+                >
                   <div id="request-jsoneditor"></div>
                 </div>
 
-                <div id="tab-settings">
+                <div
+                  id="tab-settings"
+                  style={{
+                    display: activeTab === "tab-settings" ? "" : "none",
+                  }}
+                >
                   <h3>Settings</h3>
                   <div className="form-group">
                     <label htmlFor="scroll-to-new">
@@ -420,7 +442,7 @@ export const Panel: React.FC = () => {
                     />
                   </div>
 
-                  <h3>Coming Soon</h3>
+                  {/* <h3>Coming Soon</h3> */}
                   {/* <div className="form-group" title="Not implemented yet">
                     <label htmlFor="clear-on-refresh">
                       Clear Network Log on Page Refresh
