@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import JSONEditor, { JSONEditorOptions, EditableNode } from "jsoneditor";
 
-type Tab =
+export type Tab =
   | "tab-response"
   | "tab-request"
   | "tab-response-stats"
@@ -10,7 +10,9 @@ type Tab =
 
 export function useOldCode() {
   const [activeTab, setActiveTab] = useState("");
+  const [search, setSearch] = useState("");
   const [showOriginal, setShowOriginal] = useState(false);
+  const [showIncomingRequests, setShowIncomingRequests] = useState(true);
 
   const onClear = () => {
     console.log("onClear");
@@ -46,24 +48,12 @@ export function useOldCode() {
   const LOCALSTORAGE = window.localStorage;
   const MAXBODYSIZE = 20000;
   const HOST = "https://leviolson.com"; // "http://localhost:3000"
-  const CHANGELOG = {
-    "What's New": {
-      "v1.0.1:": {
-        "Panel Settings": HOST + "/posts/bnp-changelog#panel-settings",
-        Bugs: "squashed",
-      },
-      "v1.0.0:": {
-        "Improved Search": HOST + "/posts/bnp-changelog#improved-search",
-        "JSON Editor BUILT IN":
-          HOST + "/posts/bnp-changelog#json-editor-built-in",
-        "Vertical Chrome Panel":
-          HOST + "/posts/bnp-changelog#vertical-chrome-panel",
-        "Download JSON": HOST + "/posts/bnp-changelog#download-json",
-      },
+  const defaultJSON = {
+    test: {
+      test2: "yo",
     },
   };
 
-  let search = "";
   let searchTerms = [];
   let oldSearchTerms = [];
   let andFilter = true;
@@ -75,7 +65,6 @@ export function useOldCode() {
   const showAll = true;
   let limitNetworkRequests = false;
   let currentDetailTab: Tab = "tab-response";
-  let showIncomingRequests = true;
   const autoJSONParseDepthRes = 3;
   const autoJSONParseDepthReq = 6;
   const filter = "";
@@ -130,7 +119,7 @@ export function useOldCode() {
     requestJsonEditor = new JSONEditor(requestTarget, options);
 
     setTimeout(() => {
-      responseJsonEditor.update(CHANGELOG);
+      responseJsonEditor.update(defaultJSON);
       responseJsonEditor.expandAll();
     });
   }
@@ -159,9 +148,9 @@ export function useOldCode() {
     }
 
     try {
-      showIncomingRequests = !!getLSItem("bnp-scrollToNew");
+      setShowIncomingRequests(!!getLSItem("bnp-scrollToNew"));
     } catch (e) {
-      showIncomingRequests = true;
+      setShowIncomingRequests(true);
     }
 
     console.debug("Retrieving Settings from Local Storage");
@@ -239,7 +228,7 @@ export function useOldCode() {
   function customSearch() {
     if (!searchTerms.includes(search)) {
       searchTerms.push(search);
-      search = "";
+      setSearch("");
       _setLocalStorage();
       filterRequests();
     }
@@ -588,6 +577,7 @@ export function useOldCode() {
     setActive,
     getClass,
     titleIfSeparator,
+    selectDetailTab,
     // Old data
     search,
     setSearch,
@@ -603,6 +593,7 @@ export function useOldCode() {
     limitNetworkRequests,
     currentDetailTab,
     showIncomingRequests,
+    setShowIncomingRequests,
     autoJSONParseDepthRes,
     autoJSONParseDepthReq,
     filter,
