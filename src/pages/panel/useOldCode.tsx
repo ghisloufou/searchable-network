@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import JSONEditor, { JSONEditorOptions, EditableNode } from "jsoneditor";
+import { v4 as uuidv4 } from "uuid";
 
 export type Tab =
   | "tab-response"
@@ -16,7 +17,6 @@ export function useOldCode() {
   const [searchTerms, setSearchTerms] = useState([]);
   const [oldSearchTerms, setOldSearchTerms] = useState([]);
   const [andFilter, setAndFilter] = useState(true);
-  const [uniqueId, setUniqueId] = useState(100000);
   const [activeId, setActiveId] = useState(null);
   const [requests, setRequests] = useState({});
   const [masterRequests, setMasterRequests] = useState([]);
@@ -176,12 +176,11 @@ export function useOldCode() {
       // display a line break in the network logs to show page reloaded
       setMasterRequests((masterRequests) =>
         masterRequests.concat({
-          id: uniqueId,
+          id: uuidv4(),
           separator: true,
           event: event,
         })
       );
-      setUniqueId((uniqueId) => uniqueId++);
       cleanRequests();
     });
   }
@@ -311,8 +310,7 @@ export function useOldCode() {
     response_status: number
   ) {
     console.log("addRequest initial data: ", JSON.parse(JSON.stringify(data)));
-    const requestId = data.id || uniqueId;
-    setUniqueId((uniqueId) => uniqueId++);
+    const requestId = data.id || uuidv4();
 
     if (data.request != null) {
       data["request_data"] = createKeypairs(data.request);

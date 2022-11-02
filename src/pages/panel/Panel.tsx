@@ -2,6 +2,7 @@ import React from "react";
 import { Toolbar } from "./Toolbar";
 import { Tab, useOldCode } from "./useOldCode";
 import "./panel.scss";
+import { NetworkSearch } from "./NetworkSearch";
 
 export const Panel: React.FC = () => {
   const {
@@ -102,58 +103,18 @@ export const Panel: React.FC = () => {
       <div className="container">
         <section className="wrapper">
           <section className="request">
-            <div className="search">
-              <input
-                type="text"
-                placeholder="Add search term then ENTER"
-                title='prefix with "-" to remove from search results'
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    customSearch(search);
-                  }
-                }}
-              />
-              <div className="filtering">
-                <span className="label">Filtering for:</span>
-                {searchTerms.map((term, index) => (
-                  <span>
-                    <span
-                      title="Click to remove"
-                      className={`searchterm ${term[0] === "-" ? "neg" : ""}`}
-                      onClick={() => removeSearchTerm(index)}
-                    >
-                      {term}
-                    </span>
-                    {index !== searchTerms.length && (
-                      <span
-                        className="operator"
-                        onClick={() => toggleSearchType()}
-                      >
-                        AndFilter: {andFilter ? "&" : "|"}
-                      </span>
-                    )}
-                  </span>
-                ))}
-              </div>
-              <div className="recent-searches">
-                <span className="label">Recent searches:</span>
-                {oldSearchTerms.map((term, index) => (
-                  <span
-                    title="Click to Search, right click to permanently remove from history"
-                    className={`recents ${term[0] === "-" ? "neg" : ""}`}
-                    onClick={(e) => handleOldSearchClick(e, index)}
-                    onContextMenu={(e) => handleOldSearchClick(e, index)}
-                  >
-                    {term}
-                  </span>
-                ))}
-              </div>
-            </div>
-            
+            <NetworkSearch
+              toggleSearchType={toggleSearchType}
+              customSearch={customSearch}
+              removeSearchTerm={removeSearchTerm}
+              search={search}
+              setSearch={setSearch}
+              searchTerms={searchTerms}
+              oldSearchTerms={oldSearchTerms}
+              andFilter={andFilter}
+              handleOldSearchClick={handleOldSearchClick}
+            ></NetworkSearch>
+
             <div className="requests">
               <table
                 className="header styled"
@@ -173,6 +134,7 @@ export const Panel: React.FC = () => {
                   </tr>
                 </thead>
               </table>
+
               <div className="data-container">
                 <table
                   id="requests"
@@ -189,84 +151,84 @@ export const Panel: React.FC = () => {
                     <td className="time"></td>
                     <td className="datetime"></td>
                   </tr>
-                  {filteredRequests
-                    .map((request) => (
-                      <tr
-                        scroll-to-new
-                        onClick={() =>
-                          !request.separator && setActive(request.id)
+                  {filteredRequests.map((request) => (
+                    <tr
+                      scroll-to-new
+                      onClick={() =>
+                        !request.separator && setActive(request.id)
+                      }
+                      className={`data clickable ${getClass(
+                        request.id,
+                        request.separator
+                      )}`}
+                      key={request.id}
+                    >
+                      <td
+                        className="request"
+                        title={
+                          request.request_url ||
+                          titleIfSeparator(request.separator)
                         }
-                        className={`data clickable ${getClass(
-                          request.id,
-                          request.separator
-                        )}`}
                       >
-                        <td
-                          className="request"
-                          title={
-                            request.request_url ||
-                            titleIfSeparator(request.separator)
-                          }
-                        >
-                          {request.request_url}
-                        </td>
-                        <td
-                          className="apextype"
-                          title={
-                            request.request_apex_type ||
-                            titleIfSeparator(request.separator)
-                          }
-                        >
-                          {request.request_apex_type}
-                        </td>
-                        <td
-                          className="apexmethod"
-                          title={
-                            request.request_apex_method ||
-                            titleIfSeparator(request.separator)
-                          }
-                        >
-                          {request.request_apex_method}
-                        </td>
-                        <td
-                          className="method"
-                          title={
-                            request.request_method ||
-                            titleIfSeparator(request.separator)
-                          }
-                        >
-                          {request.request_method}
-                        </td>
-                        <td
-                          className="status"
-                          title={
-                            request.response_status ||
-                            titleIfSeparator(request.separator)
-                          }
-                        >
-                          {request.response_status}
-                        </td>
-                        <td
-                          className="time"
-                          title={
-                            request.time || titleIfSeparator(request.separator)
-                          }
-                        >
-                          {/* { request.time / 1000 | number : 2 } s */}
-                          {(request.time / 1000).toFixed(2)} s
-                        </td>
-                        <td
-                          className="datetime"
-                          title={
-                            request.startedDateTime ||
-                            titleIfSeparator(request.separator)
-                          }
-                        >
-                          {/* { request.startedDateTime | date: "mediumTime" } */}
-                          {request.startedDateTime}
-                        </td>
-                      </tr>
-                    ))}
+                        {request.request_url} , {request.id}
+                      </td>
+                      <td
+                        className="apextype"
+                        title={
+                          request.request_apex_type ||
+                          titleIfSeparator(request.separator)
+                        }
+                      >
+                        {request.request_apex_type}
+                      </td>
+                      <td
+                        className="apexmethod"
+                        title={
+                          request.request_apex_method ||
+                          titleIfSeparator(request.separator)
+                        }
+                      >
+                        {request.request_apex_method}
+                      </td>
+                      <td
+                        className="method"
+                        title={
+                          request.request_method ||
+                          titleIfSeparator(request.separator)
+                        }
+                      >
+                        {request.request_method}
+                      </td>
+                      <td
+                        className="status"
+                        title={
+                          request.response_status ||
+                          titleIfSeparator(request.separator)
+                        }
+                      >
+                        {request.response_status}
+                      </td>
+                      <td
+                        className="time"
+                        title={
+                          request.time || titleIfSeparator(request.separator)
+                        }
+                      >
+                        {/* { request.time / 1000 | number : 2 } s */}
+                        {(request.time / 1000).toFixed(2)} s
+                      </td>
+                      <td
+                        className="datetime"
+                        title={
+                          request.startedDateTime ||
+                          titleIfSeparator(request.separator)
+                        }
+                      >
+                        {/* { request.startedDateTime | date: "mediumTime" } */}
+                        {request.startedDateTime}
+                      </td>
+                    </tr>
+                  ))}
                 </table>
               </div>
             </div>
@@ -342,7 +304,7 @@ export const Panel: React.FC = () => {
                   {tabRequestStats
                     .filter(({ data }) => data && data.length)
                     .map(({ data, headerText, id, tab, title }) => (
-                      <table id={id} className="styled" title={title}>
+                      <table id={id} className="styled" title={title} key={id}>
                         <thead>
                           <tr>
                             <th colSpan={2}>{headerText}</th>
@@ -350,7 +312,10 @@ export const Panel: React.FC = () => {
                         </thead>
                         <tbody>
                           {data.map((param) => (
-                            <tr onClick={() => tab && selectDetailTab(tab)}>
+                            <tr
+                              onClick={() => tab && selectDetailTab(tab)}
+                              key={param.name}
+                            >
                               <td className="key">{param.name}</td>
                               {/* <td><pretty-print data="param.value" /></td> */}
                               <td className="value">
@@ -372,7 +337,7 @@ export const Panel: React.FC = () => {
                   {tabResponseStats
                     .filter(({ data }) => data.length)
                     .map(({ data, headerText, id, tab, title }) => (
-                      <table id={id} className="styled" title={title}>
+                      <table id={id} className="styled" title={title} key={id}>
                         <thead>
                           <tr>
                             <th colSpan={2}>{headerText}</th>
@@ -380,7 +345,10 @@ export const Panel: React.FC = () => {
                         </thead>
                         <tbody>
                           {data.map((param) => (
-                            <tr onClick={() => tab && selectDetailTab(tab)}>
+                            <tr
+                              onClick={() => tab && selectDetailTab(tab)}
+                              key={param.name}
+                            >
                               <td className="key">{param.name}</td>
                               {/* <td><pretty-print data="param.value" /></td> */}
                               <td className="value">
