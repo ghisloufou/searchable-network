@@ -170,7 +170,7 @@ export const Panel: React.FC = () => {
                           titleIfSeparator(request.separator)
                         }
                       >
-                        {request.request_url} , {request.id}
+                        {request.request_url}
                       </td>
                       <td
                         className="apextype"

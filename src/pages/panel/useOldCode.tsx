@@ -45,7 +45,7 @@ export function useOldCode() {
     searchTerms,
     search,
     oldSearchTerms,
-    requests,
+    requests, // maybe usememo when this object is updated
     masterRequests,
   ]);
 
