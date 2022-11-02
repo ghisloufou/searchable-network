@@ -12,7 +12,6 @@ export const Toolbar = ({ onToggleJsonParse, onClear }: ToolbarProps) => {
           title="Toggle JSON Parsing (See Panel Settings)"
         >
           <i className="icon-embed"></i>
-          Toggle JSON Parsing (See Panel Settings)
           <input
             type="checkbox"
             name="toggleJsonParsing"

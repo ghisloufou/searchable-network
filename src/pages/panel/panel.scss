@@ -1,6 +1,4 @@
 * {
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 
@@ -226,27 +224,21 @@ section.wrapper {
     }
 
     .tabbed-pane {
-      -webkit-box-orient: vertical;
-      -moz-box-orient: vertical;
-      -ms-box-orient: vertical;
       box-orient: vertical;
-      display: -webkit-box;
-      display: -moz-box;
-      display: -ms-box;
       display: box;
       height: 100%;
       width: 100%;
-      &-header {
+      .tabbed-pane-header {
         border-bottom: 1px solid rgb(205, 205, 205);
         padding-left: 0;
         padding-top: 1px;
         white-space: nowrap;
         height: 26px;
         background: #efefef;
-        &-contents {
+        .tabbed-pane-header-contents {
           margin: 0 10px;
         }
-        &-tabs {
+        .tabbed-pane-header-tabs {
           margin: 0;
           min-width: 300px;
           padding: 0;
@@ -257,7 +249,7 @@ section.wrapper {
             position: absolute;
           }
         }
-        &-tab {
+        .tabbed-pane-header-tab {
           border: 1px solid #cdcdcd;
           border-bottom: none;
           float: left;
@@ -269,7 +261,7 @@ section.wrapper {
           vertical-align: middle;
           white-space: nowrap;
           margin: 2px 0px;
-          &-title {
+          .tabbed-pane-header-tab-title {
             color: #000;
             display: block;
             font-size: 12px;
@@ -279,21 +271,21 @@ section.wrapper {
             white-space: nowrap;
           }
         }
+
         .ui-tabs-active {
           background-color: white;
           border: 1px solid rgb(205, 205, 205);
           border-bottom: none;
         }
-        &-tab,
-        &-tab a,
-        &-tab a:active {
+
+        .tabbed-pane-header-tab,
+        .tabbed-pane-header-tab a,
+        .tabbed-pane-header-tab a:active {
           outline: none;
         }
       }
-      &-content {
-        -webkit-box-flex: 1;
-        -moz-box-flex: 1;
-        -ms-box-flex: 1;
+
+      .tabbed-pane-content {
         box-flex: 1;
         overflow: auto;
         padding: 0px;

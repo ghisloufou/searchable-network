@@ -239,6 +239,10 @@ export const Panel: React.FC = () => {
               <div className="tabbed-pane-header">
                 <div className="tabbed-pane-header-contents">
                   <ul className="tabbed-pane-header-tabs">
+                    <Toolbar
+                      onToggleJsonParse={onToggleJsonParse}
+                      onClear={onClear}
+                    />
                     <li className="tabbed-pane-header-tab">
                       <a
                         href="#tab-response"
@@ -448,8 +452,6 @@ export const Panel: React.FC = () => {
             </div>
           </section>
         </section>
-
-        <Toolbar onToggleJsonParse={onToggleJsonParse} onClear={onClear} />
       </div>
     </>
   );
