@@ -7,7 +7,6 @@ export const Panel: React.FC = () => {
   const {
     onClear,
     onToggleJsonParse,
-    filterRequests,
     toggleSearchType,
     customSearch,
     addSearchTerm,
@@ -22,19 +21,9 @@ export const Panel: React.FC = () => {
     searchTerms,
     oldSearchTerms,
     andFilter,
-    uniqueId,
-    activeId,
-    requests,
-    masterRequests,
     filteredRequests,
-    showAll,
-    limitNetworkRequests,
     showIncomingRequests,
     setShowIncomingRequests,
-    autoJSONParseDepthRes,
-    autoJSONParseDepthReq,
-    filter,
-    editor,
     activeCookies,
     activeHeaders,
     activePostData,
@@ -42,14 +31,14 @@ export const Panel: React.FC = () => {
     activeResponseData,
     activeResponseCookies,
     activeResponseHeaders,
-    activeCode,
-    responseJsonEditor,
-    requestJsonEditor,
     showOriginal,
     activeTab,
   } = useOldCode();
 
-  const handleOldSearchClick = (e, index) => {
+  const handleOldSearchClick = (
+    e: React.MouseEvent<HTMLSpanElement, MouseEvent>,
+    index: number
+  ) => {
     if (e.type === "click") {
       addSearchTerm(index);
     } else if (e.type === "contextmenu") {
@@ -121,7 +110,11 @@ export const Panel: React.FC = () => {
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
-                  customSearch();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    customSearch(search);
+                  }
                 }}
               />
               <div className="filtering">
@@ -140,7 +133,7 @@ export const Panel: React.FC = () => {
                         className="operator"
                         onClick={() => toggleSearchType()}
                       >
-                        {andFilter}
+                        AndFilter: {andFilter ? "&" : "|"}
                       </span>
                     )}
                   </span>
@@ -160,6 +153,7 @@ export const Panel: React.FC = () => {
                 ))}
               </div>
             </div>
+            
             <div className="requests">
               <table
                 className="header styled"
@@ -196,7 +190,6 @@ export const Panel: React.FC = () => {
                     <td className="datetime"></td>
                   </tr>
                   {filteredRequests
-                    .sort((a, b) => (a.id > b.id ? 1 : -1))
                     .map((request) => (
                       <tr
                         scroll-to-new
@@ -347,7 +340,7 @@ export const Panel: React.FC = () => {
                   }}
                 >
                   {tabRequestStats
-                    .filter(({ data }) => data.length)
+                    .filter(({ data }) => data && data.length)
                     .map(({ data, headerText, id, tab, title }) => (
                       <table id={id} className="styled" title={title}>
                         <thead>

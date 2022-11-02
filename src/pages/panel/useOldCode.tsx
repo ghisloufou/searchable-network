@@ -33,6 +33,22 @@ export function useOldCode() {
   const [activeResponseHeaders, setActiveResponseHeaders] = useState([]);
   const [activeCode, setActiveCode] = useState(null);
 
+  useEffect(() => {
+    console.log("filteredRequests", filteredRequests);
+  }, [filteredRequests]);
+
+  useEffect(() => {
+    _setLocalStorage();
+    filterRequests();
+  }, [
+    andFilter,
+    searchTerms,
+    search,
+    oldSearchTerms,
+    requests,
+    masterRequests,
+  ]);
+
   const LOCALSTORAGE = window.localStorage;
   const MAXBODYSIZE = 20000;
   const DEFAULTJSON = {
@@ -41,11 +57,8 @@ export function useOldCode() {
     },
   };
   const limitNetworkRequests = true;
-  const showAll = true;
   const autoJSONParseDepthRes = 3;
   const autoJSONParseDepthReq = 6;
-  const filter = "";
-  const editor = null;
 
   const onToggleJsonParse = () => {
     setShowOriginal(!showOriginal);
@@ -175,6 +188,7 @@ export function useOldCode() {
 
   function filterRequests() {
     if (!searchTerms || searchTerms.length === 0) {
+      console.log("filterRequests()", masterRequests);
       setFilteredRequests(masterRequests);
       return;
     }
@@ -191,13 +205,17 @@ export function useOldCode() {
       }
     }
 
-    const newFilteredRequests = masterRequests.filter((x) => {
-      if (x.separator) {
+    const newFilteredRequests = masterRequests.filter((masterRequest) => {
+      if (masterRequest.separator) {
         return true;
       }
       for (const term of negTerms) {
         // if neg
-        if (x && x.searchIndex && x.searchIndex.includes(term)) {
+        if (
+          masterRequest &&
+          masterRequest.searchIndex &&
+          masterRequest.searchIndex.includes(term)
+        ) {
           return false;
         }
       }
@@ -206,7 +224,11 @@ export function useOldCode() {
         // AND condition
         for (const term of posTerms) {
           // if pos
-          if (x && x.searchIndex && !x.searchIndex.includes(term)) {
+          if (
+            masterRequest &&
+            masterRequest.searchIndex &&
+            !masterRequest.searchIndex.includes(term)
+          ) {
             return false;
           }
         }
@@ -215,7 +237,11 @@ export function useOldCode() {
         // OR condition
         for (const term of posTerms) {
           // if pos
-          if (x && x.searchIndex && x.searchIndex.includes(term)) {
+          if (
+            masterRequest &&
+            masterRequest.searchIndex &&
+            masterRequest.searchIndex.includes(term)
+          ) {
             return true;
           }
         }
@@ -228,16 +254,12 @@ export function useOldCode() {
 
   function toggleSearchType() {
     setAndFilter((andFilter) => !andFilter);
-    _setLocalStorage();
-    filterRequests();
   }
 
-  function customSearch() {
-    if (!searchTerms.includes(search)) {
-      setSearchTerms((st) => st.concat(search));
+  function customSearch(value: string) {
+    if (!searchTerms.includes(value)) {
+      setSearchTerms((st) => st.concat(value));
       setSearch("");
-      _setLocalStorage();
-      filterRequests();
     }
   }
 
@@ -258,8 +280,6 @@ export function useOldCode() {
     setOldSearchTerms((oldSearchTerm) =>
       oldSearchTerm.filter((_, i) => i !== index)
     );
-    _setLocalStorage();
-    filterRequests();
   }
 
   function removeSearchTerm(index: number) {
@@ -267,13 +287,12 @@ export function useOldCode() {
       oldSearchTerm.concat(searchTerms[index])
     );
     setSearchTerms((searchTerm) => searchTerm.filter((_, i) => i !== index));
-    _setLocalStorage();
-    filterRequests();
   }
 
   function deleteSearchTerm(index: number) {
-    setOldSearchTerms(oldSearchTerms.filter((_, i) => i !== index));
-    _setLocalStorage();
+    setOldSearchTerms((oldSearchTerms) =>
+      oldSearchTerms.filter((_, i) => i !== index)
+    );
   }
 
   function handleRequest(har_entry: chrome.devtools.network.Request) {
@@ -286,11 +305,12 @@ export function useOldCode() {
   }
 
   function addRequest(
-    data, // data: chrome.devtools.network.Request
+    data, // : chrome.devtools.network.Request,
     request_method: string,
     request_url: string | string[],
     response_status: number
   ) {
+    console.log("addRequest initial data: ", JSON.parse(JSON.stringify(data)));
     const requestId = data.id || uniqueId;
     setUniqueId((uniqueId) => uniqueId++);
 
@@ -306,6 +326,7 @@ export function useOldCode() {
         data.postData = createKeypairs(data.request.postData);
       }
     }
+
     if (data.response != null) {
       data["response_data"] = createKeypairs(data.response);
       data.response_data.response_body = "Loading " + requestId;
@@ -356,6 +377,7 @@ export function useOldCode() {
         return requests;
       });
     });
+    console.log("addRequest final data: ", JSON.parse(JSON.stringify(data)));
 
     cleanRequests();
   }
@@ -366,7 +388,7 @@ export function useOldCode() {
         setMasterRequests((masterRequests) => masterRequests.shift());
       }
       const keys = Object.keys(requests).reverse().slice(500);
-      keys.forEach(function (key) {
+      keys.forEach((key) => {
         if (requests[key]) {
           setRequests((requests) => {
             delete requests[key];
@@ -375,7 +397,6 @@ export function useOldCode() {
         }
       });
     }
-    filterRequests();
   }
 
   function clear() {
@@ -426,13 +447,16 @@ export function useOldCode() {
     return "";
   }
 
-  function createKeypairs(data) {
+  function createKeypairs(data): {
+    name: string;
+    value: string;
+  }[] {
     const keypairs = [];
     if (!(data instanceof Object)) {
       return keypairs;
     }
 
-    data.forEach((key, value) => {
+    Object.entries(data).forEach(([key, value]) => {
       if (!(value instanceof Object)) {
         keypairs.push({
           name: key,
@@ -573,7 +597,6 @@ export function useOldCode() {
     onClear,
     activeTab,
     // Old func
-    filterRequests,
     toggleSearchType,
     customSearch,
     addSearchTerm,
@@ -589,19 +612,9 @@ export function useOldCode() {
     searchTerms,
     oldSearchTerms,
     andFilter,
-    uniqueId,
-    activeId,
-    requests,
-    masterRequests,
     filteredRequests,
-    showAll,
-    limitNetworkRequests,
     showIncomingRequests,
     setShowIncomingRequests,
-    autoJSONParseDepthRes,
-    autoJSONParseDepthReq,
-    filter,
-    editor,
     activeCookies,
     activeHeaders,
     activePostData,
@@ -609,9 +622,6 @@ export function useOldCode() {
     activeResponseData,
     activeResponseCookies,
     activeResponseHeaders,
-    activeCode,
-    responseJsonEditor,
-    requestJsonEditor,
     showOriginal,
   };
 }
