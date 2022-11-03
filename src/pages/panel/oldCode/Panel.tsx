@@ -1,10 +1,10 @@
 import React from "react";
 import { Toolbar } from "./Toolbar";
 import { Tab, useOldCode } from "./useOldCode";
-import "./panel.scss";
+// import "./panel.scss";
 import { NetworkSearch } from "./NetworkSearch";
 
-export const Panel: React.FC = () => {
+export const OldPanel: React.FC = () => {
   const {
     onClear,
     onToggleJsonParse,
@@ -100,7 +100,7 @@ export const Panel: React.FC = () => {
 
   return (
     <>
-      <div className="container">
+      <div>
         <section className="wrapper">
           <section className="request">
             <NetworkSearch

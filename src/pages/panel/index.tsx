@@ -1,8 +1,7 @@
-import React from "react";
+import "@pages/panel/index.scss";
 import { createRoot } from "react-dom/client";
-import "@pages/panel/index.css";
 import refreshOnUpdate from "virtual:reload-on-update-in-view";
-import { Panel } from "./Panel";
+import { Home } from "./Home";
 
 refreshOnUpdate("pages/panel");
 
@@ -11,8 +10,9 @@ function init() {
   if (!appContainer) {
     throw new Error("Can not find AppContainer");
   }
+
   const root = createRoot(appContainer);
-  root.render(<Panel />);
+  root.render(<Home />);
 }
 
 init();

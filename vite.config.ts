@@ -1,14 +1,16 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import path, { resolve } from "path";
+import { resolve, parse } from "path";
 import makeManifest from "./utils/plugins/make-manifest";
 import customDynamicImport from "./utils/plugins/custom-dynamic-import";
 import addHmr from "./utils/plugins/add-hmr";
 import manifest from "./manifest";
 
 const root = resolve(__dirname, "src");
+const root2 = resolve(__dirname, "dist");
 const pagesDir = resolve(root, "pages");
 const assetsDir = resolve(root, "assets");
+const bootstrapDir = resolve(__dirname, "node_modules/bootstrap");
 const outDir = resolve(__dirname, "dist");
 const publicDir = resolve(__dirname, "public");
 
@@ -21,8 +23,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@src": root,
+      "@ddd": root2,
       "@assets": assetsDir,
       "@pages": pagesDir,
+      "@bootstrap": bootstrapDir,
     },
   },
   plugins: [
@@ -52,7 +56,7 @@ export default defineConfig({
           ? "assets/js/[name].js"
           : "assets/js/[name].[hash].js",
         assetFileNames: (assetInfo) => {
-          const { dir, name: _name } = path.parse(assetInfo.name);
+          const { dir, name: _name } = parse(assetInfo.name);
           const assetFolder = getLastElement(dir.split("/"));
           const name = assetFolder + firstUpperCase(_name);
           return `assets/[ext]/${name}.chunk.[ext]`;
