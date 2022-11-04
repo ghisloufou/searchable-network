@@ -2,4 +2,5 @@
 $body-bg: #242424;
 $body-color: #fff;
 
-@import "@bootstrap/scss/bootstrap";
+@import "@node_modules/bootstrap/scss/bootstrap";
+@import "@node_modules/vanilla-jsoneditor/themes/jse-theme-dark.css";

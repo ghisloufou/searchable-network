@@ -4,7 +4,6 @@
 
 .clickable {
   cursor: pointer;
-
   td:hover {
     background-color: #384048;
   }
@@ -16,10 +15,11 @@
   }
 }
 
-.table-dark {
+.custom-table {
   th,
   td {
     word-wrap: break-word;
     max-width: 150px;
+    font-size: small;
   }
 }

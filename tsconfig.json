@@ -18,7 +18,7 @@
     "typeRoots": ["./src/global.d.ts"],
     "paths": {
       "@src/*": ["src/*"],
-      "@bootstrap/*": ["node_modules/bootstrap/*"],
+      "@node_modules/*": ["node_modules/*"],
       "@assets/*": ["src/assets/*"],
       "@pages/*": ["src/pages/*"],
       "virtual:reload-on-update-in-background-script": ["./src/global.d.ts"],

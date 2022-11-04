@@ -43,13 +43,14 @@ export function useGetNetworkData() {
 
   useEffect(() => {
     setFilteredRequests(
-      requests.filter((request) =>
-        filters.every((filter) => {
-          if (filter[0] === "-") {
-            return !request.request.truncatedUrl.includes(filter.slice(1));
-          }
-          return request.request.truncatedUrl.includes(filter);
-        })
+      requests.filter(
+        (request) =>
+          filters.every((filter) => {
+            if (filter[0] === "-") {
+              return !request.request.truncatedUrl.includes(filter.slice(1));
+            }
+            return request.request.truncatedUrl.includes(filter);
+          }) && request.request.method !== "OPTIONS"
       )
     );
   }, [requests, filters]);
@@ -61,15 +62,33 @@ export function useGetNetworkData() {
     if (request.request.url.startsWith("chrome-extension://")) {
       return;
     }
-    const newRequest: NetworkRequestEnhanced = {
-      ...request,
-      uuid: uuidv4(),
-      request: {
-        ...request.request,
-        truncatedUrl: request.request.url.split("/").slice(-2).join("/"),
-      },
-    };
-    setRequests((requests) => requests.concat(newRequest));
+    request.getContent((responseContentUnparsed) => {
+      let responseContent = { no: "response found" };
+      try {
+        responseContent = JSON.parse(responseContentUnparsed);
+      } catch {}
+      let requestContent = { no: "request found" };
+      try {
+        requestContent = JSON.parse(request.request.postData.text);
+      } catch {}
+
+      const newRequest: NetworkRequestEnhanced = {
+        ...request,
+        uuid: uuidv4(),
+        request: {
+          ...request.request,
+          requestContent,
+          truncatedUrl: request.request.url.split("/").slice(-2).join("/"),
+        },
+        response: {
+          ...request.response,
+          responseContent,
+        },
+      };
+      setRequests((requests) => {
+        return requests.concat(newRequest);
+      });
+    });
   };
 
   const onNavigatedListener = (url: string) => {
@@ -88,10 +107,15 @@ export function useGetNetworkData() {
     setFilters((filters) => filters.filter((_, i) => i !== index));
   }
 
+  function clearFilters() {
+    setFilters([]);
+  }
+
   return {
     filteredRequests,
     addFilter,
     removeFilter,
+    clearFilters,
     filters,
     tableRef,
     searchRef,

@@ -10,7 +10,7 @@ const root = resolve(__dirname, "src");
 const root2 = resolve(__dirname, "dist");
 const pagesDir = resolve(root, "pages");
 const assetsDir = resolve(root, "assets");
-const bootstrapDir = resolve(__dirname, "node_modules/bootstrap");
+const nodeModulesDir = resolve(__dirname, "node_modules");
 const outDir = resolve(__dirname, "dist");
 const publicDir = resolve(__dirname, "public");
 
@@ -26,7 +26,7 @@ export default defineConfig({
       "@ddd": root2,
       "@assets": assetsDir,
       "@pages": pagesDir,
-      "@bootstrap": bootstrapDir,
+      "@node_modules": nodeModulesDir,
     },
   },
   plugins: [

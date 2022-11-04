@@ -7,7 +7,7 @@ type NetworkRequestsProps = {
 };
 
 export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
-  const selectedRequest = useContext(RequestContext);
+  const { selectedRequest, isDarkModeEnabled } = useContext(RequestContext);
   const {
     filteredRequests,
     filters,
@@ -15,11 +15,15 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
     tableRef,
     addFilter,
     removeFilter,
+    clearFilters,
   } = useGetNetworkData();
 
   return (
     <section>
-      <div className="d-flex flex-wrap">
+      <div className="d-flex flex-wrap align-items-center">
+        <button onClick={() => clearFilters()} className="btn">
+          Clear
+        </button>
         <label htmlFor="searchInput">Search</label>
         <input
           className="form-control form-control-sm mx-2"
@@ -58,7 +62,11 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
         style={{ maxHeight: "400px" }}
         className="overflow-auto"
       >
-        <table className="table table-dark table-striped table-sm">
+        <table
+          className={`table table-striped table-sm custom-table ${
+            isDarkModeEnabled ? "table-dark" : ""
+          }`}
+        >
           <thead>
             <tr
               className="sticky-top"
@@ -79,7 +87,7 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
                 }
                 onClick={() => onRequestClick(request)}
                 className={`clickable ${
-                  selectedRequest?.uuid === request.uuid && "selected"
+                  selectedRequest?.uuid === request.uuid ? "selected" : ""
                 }`}
               >
                 <td scope="row">{index}</td>
