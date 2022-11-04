@@ -15,3 +15,11 @@
     background-color: #384048;
   }
 }
+
+.table-dark {
+  th,
+  td {
+    word-wrap: break-word;
+    max-width: 150px;
+  }
+}
