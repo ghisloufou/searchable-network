@@ -12,18 +12,13 @@ export function useGetNetworkData() {
   const tableRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    scrollToBottom(tableRef.current);
-  }, [filteredRequests]);
+    chrome.storage.local.get(["filters"], (storage) => {
+      const storedFilters = storage["filters"];
+      if (storedFilters) {
+        setFilters(storedFilters);
+      }
+    });
 
-  useEffect(() => {
-    setFilteredRequests(
-      requests.filter((request) =>
-        filters.every((filter) => request.request.truncatedUrl.includes(filter))
-      )
-    );
-  }, [requests, filters]);
-
-  useEffect(() => {
     chrome.devtools.network.onRequestFinished.addListener(
       onRequestFinishedListener
     );
@@ -37,6 +32,27 @@ export function useGetNetworkData() {
       chrome.devtools.network.onNavigated.removeListener(onNavigatedListener);
     };
   }, []);
+
+  useEffect(() => {
+    scrollToBottom(tableRef.current);
+  }, [filteredRequests]);
+
+  useEffect(() => {
+    chrome.storage.local.set({ filters });
+  }, [filters]);
+
+  useEffect(() => {
+    setFilteredRequests(
+      requests.filter((request) =>
+        filters.every((filter) => {
+          if (filter[0] === "-") {
+            return !request.request.truncatedUrl.includes(filter.slice(1));
+          }
+          return request.request.truncatedUrl.includes(filter);
+        })
+      )
+    );
+  }, [requests, filters]);
 
   const onRequestFinishedListener = (
     request: NetworkRequest
@@ -58,7 +74,7 @@ export function useGetNetworkData() {
 
   const onNavigatedListener = (url: string) => {
     console.log("onNavigatedListener: url", url);
-    setRequests([]);
+    // setRequests([]);
     //  todo?: display a line break in the network logs to show page reloaded
   };
 
