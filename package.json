@@ -14,8 +14,10 @@
     "build:hmr": "rollup --config utils/reload/rollup.config.ts",
     "wss": "node utils/reload/initReloadServer.js",
     "dev": "yarn build:hmr && (yarn wss & nodemon)",
+    "devp": "pnpm build:hmr && (pnpm wss & nodemon)",
     "test": "jest",
-    "start": "concurrently -n dev,typew,buildw \"yarn dev\" \"yarn typew\" \"yarn buildw\""
+    "start": "concurrently -n dev,typew,buildw \"yarn dev\" \"yarn typew\" \"yarn buildw\"",
+    "startp": "concurrently -n dev,typew,buildw \"pnpm devp\" \"pnpm typew\" \"pnpm buildw\""
   },
   "type": "module",
   "dependencies": {
