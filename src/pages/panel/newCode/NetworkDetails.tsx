@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useContext } from "react";
+import { RequestContext } from "./Panel";
 
 export function NetworkDetails() {
+  const selectedRequest = useContext(RequestContext);
   /* json editor */
-  return <section>Json editor</section>;
+  return <section>{selectedRequest?.request.truncatedUrl}</section>;
 }

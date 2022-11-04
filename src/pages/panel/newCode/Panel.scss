@@ -1,0 +1,17 @@
+.hover-bg-red:hover {
+  background-color: red !important;
+}
+
+.clickable {
+  cursor: pointer;
+
+  td:hover {
+    background-color: #384048;
+  }
+}
+
+.selected {
+  td {
+    background-color: #384048;
+  }
+}
