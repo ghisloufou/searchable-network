@@ -12,12 +12,16 @@ export function useGetNetworkData() {
   const tableRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    chrome.storage.local.get(["filters"], (storage) => {
-      const storedFilters = storage["filters"];
-      if (storedFilters) {
-        setFilters(storedFilters);
-      }
-    });
+    if (chrome.storage) {
+      chrome.storage.local.get(["filters"], (storage) => {
+        const storedFilters = storage["filters"];
+        if (storedFilters) {
+          setFilters(storedFilters);
+        }
+      });
+    } else {
+      console.error("chrome.storage.local is undefined");
+    }
 
     chrome.devtools.network.onRequestFinished.addListener(
       onRequestFinishedListener
@@ -38,7 +42,11 @@ export function useGetNetworkData() {
   }, [filteredRequests]);
 
   useEffect(() => {
-    chrome.storage.local.set({ filters });
+    if (chrome.storage) {
+      chrome.storage.local.set({ filters });
+    } else {
+      console.error("chrome.storage.local is undefined");
+    }
   }, [filters]);
 
   useEffect(() => {
@@ -55,39 +63,12 @@ export function useGetNetworkData() {
     );
   }, [requests, filters]);
 
-  const onRequestFinishedListener = (
-    request: NetworkRequest
-  ): NetworkRequestEnhanced => {
+  const onRequestFinishedListener = (request: NetworkRequest) => {
     // do not show requests to chrome extension resources
-    if (request.request.url.startsWith("chrome-extension://")) {
-      return;
-    }
-    request.getContent((responseContentUnparsed) => {
-      let responseContent = { no: "response found" };
-      try {
-        responseContent = JSON.parse(responseContentUnparsed);
-      } catch {}
-      let requestContent = { no: "request found" };
-      try {
-        requestContent = JSON.parse(request.request.postData.text);
-      } catch {}
+    const newRequest = getEnhancedRequest(request);
 
-      const newRequest: NetworkRequestEnhanced = {
-        ...request,
-        uuid: uuidv4(),
-        request: {
-          ...request.request,
-          requestContent,
-          truncatedUrl: request.request.url.split("/").slice(-2).join("/"),
-        },
-        response: {
-          ...request.response,
-          responseContent,
-        },
-      };
-      setRequests((requests) => {
-        return requests.concat(newRequest);
-      });
+    setRequests((requests) => {
+      return requests.concat(newRequest);
     });
   };
 
@@ -108,7 +89,30 @@ export function useGetNetworkData() {
   }
 
   function clearFilters() {
-    setFilters([]);
+    setRequests([]);
+  }
+
+  function loadPreviousRequests() {
+    chrome.devtools.network.getHAR((harLog) => {
+      setRequests((requests) => {
+        if (!requests.length) {
+          return harLog.entries.map(getEnhancedRequest);
+        }
+        return requests;
+      });
+    });
+  }
+
+  function updateResponseContent(requestToUpdate: NetworkRequestEnhanced) {
+    setRequests((requests) =>
+      requests.map((request) => {
+        if (request.uuid === requestToUpdate.uuid) {
+          request.response.responseContent =
+            requestToUpdate.response.responseContent;
+        }
+        return request;
+      })
+    );
   }
 
   return {
@@ -116,6 +120,8 @@ export function useGetNetworkData() {
     addFilter,
     removeFilter,
     clearFilters,
+    loadPreviousRequests,
+    updateResponseContent,
     filters,
     tableRef,
     searchRef,
@@ -124,4 +130,25 @@ export function useGetNetworkData() {
 
 function scrollToBottom(element: HTMLDivElement) {
   element.scroll({ top: element.scrollHeight, behavior: "smooth" });
+}
+
+function getEnhancedRequest(request: NetworkRequest): NetworkRequestEnhanced {
+  if (request.request.url.startsWith("chrome-extension://")) {
+    return;
+  }
+  let requestContent = { no: "request found" };
+  try {
+    requestContent = JSON.parse(request.request.postData.text);
+  } catch {}
+
+  const newRequest = request as NetworkRequestEnhanced;
+
+  newRequest.request.requestContent = requestContent;
+  newRequest.request.truncatedUrl = request.request.url
+    .split("/")
+    .slice(-2)
+    .join("/");
+  newRequest.uuid = uuidv4();
+
+  return newRequest;
 }

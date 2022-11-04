@@ -11,7 +11,7 @@ export type NetworkRequestEnhanced = NetworkRequest & {
   };
   uuid: string;
   response: {
-    responseContent: any;
+    responseContent?: any;
   };
 };
 

@@ -1,6 +1,8 @@
 // Default variable overrides
 $body-bg: #242424;
 $body-color: #fff;
+$nav-link-padding-y: 0.1rem;
+$nav-link-font-size: small;
 
 @import "@node_modules/bootstrap/scss/bootstrap";
 @import "@node_modules/vanilla-jsoneditor/themes/jse-theme-dark.css";

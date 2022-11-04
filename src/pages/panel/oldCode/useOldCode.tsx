@@ -34,7 +34,6 @@ export function useOldCode() {
   const [activeCode, setActiveCode] = useState(null);
 
   useEffect(() => {
-    console.log("filteredRequests", filteredRequests);
   }, [filteredRequests]);
 
   useEffect(() => {
@@ -187,11 +186,9 @@ export function useOldCode() {
 
   function filterRequests() {
     if (!searchTerms || searchTerms.length === 0) {
-      console.log("filterRequests()", masterRequests);
       setFilteredRequests(masterRequests);
       return;
     }
-    console.log("Filtering for: ", searchTerms);
 
     const negTerms = [];
     const posTerms = [];
@@ -309,7 +306,6 @@ export function useOldCode() {
     request_url: string | string[],
     response_status: number
   ) {
-    console.log("addRequest initial data: ", JSON.parse(JSON.stringify(data)));
     const requestId = data.id || uuidv4();
 
     if (data.request != null) {
@@ -375,7 +371,6 @@ export function useOldCode() {
         return requests;
       });
     });
-    console.log("addRequest final data: ", JSON.parse(JSON.stringify(data)));
 
     cleanRequests();
   }

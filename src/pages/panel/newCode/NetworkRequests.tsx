@@ -16,14 +16,33 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
     addFilter,
     removeFilter,
     clearFilters,
+    loadPreviousRequests,
+    updateResponseContent,
   } = useGetNetworkData();
+
+  const handleOnRequestClick = (request: NetworkRequestEnhanced) => {
+    if (!request.response.responseContent) {
+      request.getContent((responseContentUnparsed) => {
+        let responseContent = { no: "response found" };
+        try {
+          responseContent = JSON.parse(responseContentUnparsed);
+        } catch {}
+        const requestWithResponseContent = {
+          ...request,
+          response: {
+            ...request.response,
+            responseContent,
+          },
+        };
+        onRequestClick(requestWithResponseContent);
+        updateResponseContent(requestWithResponseContent);
+      });
+    }
+  };
 
   return (
     <section>
       <div className="d-flex flex-wrap align-items-center">
-        <button onClick={() => clearFilters()} className="btn">
-          Clear
-        </button>
         <label htmlFor="searchInput">Search</label>
         <input
           className="form-control form-control-sm mx-2"
@@ -57,6 +76,23 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
         ))}
       </div>
 
+      <div className="d-flex flex-wrap align-items-center">
+        <button
+          onClick={() => clearFilters()}
+          className={`btn btn-${isDarkModeEnabled ? "dark" : "light"}`}
+        >
+          Clear
+        </button>
+        {!filters.length && !filteredRequests.length && (
+          <button
+            onClick={() => loadPreviousRequests()}
+            className={`btn btn-${isDarkModeEnabled ? "dark" : "light"}`}
+          >
+            Load previous data
+          </button>
+        )}
+      </div>
+
       <div
         ref={tableRef}
         style={{ maxHeight: "400px" }}
@@ -82,13 +118,11 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
           <tbody>
             {filteredRequests.map((request, index) => (
               <tr
-                key={
-                  String(index) + request.request.url + request.startedDateTime
-                }
-                onClick={() => onRequestClick(request)}
+                key={request.uuid}
+                onClick={() => handleOnRequestClick(request)}
                 className={`clickable ${
                   selectedRequest?.uuid === request.uuid ? "selected" : ""
-                }`}
+                } ${request.response.status >= 400 ? "text-danger" : ""}`}
               >
                 <td scope="row">{index}</td>
                 <td title={request.request.url}>

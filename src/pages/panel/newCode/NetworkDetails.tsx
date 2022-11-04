@@ -3,22 +3,37 @@ import { RequestContext } from "./Panel";
 import { ReactJSONEditor } from "./ReactJSONEditor";
 
 export function NetworkDetails() {
-  const {selectedRequest} = useContext(RequestContext);
+  const { selectedRequest } = useContext(RequestContext);
 
   const [isResponseDisplayed, setIsResponseDisplayed] =
     useState<boolean>(false);
 
   return (
     <section>
-      <label htmlFor="isReponseDisplayed">
-        Switch to {isResponseDisplayed ? "Request" : "Response"}
-      </label>
-      <input
-        type="checkbox"
-        id="isResponseDisplayed"
-        checked={isResponseDisplayed}
-        onChange={() => setIsResponseDisplayed((value) => !value)}
-      />
+      {selectedRequest && (
+        <ul className="nav nav-tabs">
+          <li className="nav-item">
+            <button
+              className={`nav-link text-white ${
+                isResponseDisplayed ? "" : "active"
+              }`}
+              onClick={() => setIsResponseDisplayed(false)}
+            >
+              Request
+            </button>
+          </li>
+          <li className="nav-item">
+            <button
+              className={`nav-link text-white ${
+                isResponseDisplayed ? "active" : ""
+              }`}
+              onClick={() => setIsResponseDisplayed(true)}
+            >
+              Response
+            </button>
+          </li>
+        </ul>
+      )}
       <ReactJSONEditor
         content={{
           json: (isResponseDisplayed

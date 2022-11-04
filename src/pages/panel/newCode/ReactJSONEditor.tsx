@@ -13,7 +13,6 @@ export function ReactJSONEditor({ content }: ReactJSONEditorProps) {
 
   useEffect(() => {
     // create editor
-    console.log("create editor", refContainer.current);
     refEditor.current = new JSONEditor({
       target: refContainer.current,
       props: {
@@ -24,7 +23,6 @@ export function ReactJSONEditor({ content }: ReactJSONEditorProps) {
     return () => {
       // destroy editor
       if (refEditor.current) {
-        console.log("destroy editor");
         refEditor.current.destroy();
         refEditor.current = null;
       }
@@ -34,9 +32,7 @@ export function ReactJSONEditor({ content }: ReactJSONEditorProps) {
   // update editor content
   useEffect(() => {
     if (refEditor.current) {
-      console.log("update content", content);
       refEditor.current.update(content);
-      console.log("refEditor.current", refEditor.current);
     }
   }, [content]);
 
