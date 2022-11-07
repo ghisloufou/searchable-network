@@ -6,6 +6,22 @@ type NetworkRequestsProps = {
   onRequestClick: (request: NetworkRequestEnhanced) => void;
 };
 
+function ErrorrableTd({
+  isError,
+  value,
+  title,
+}: {
+  isError: boolean;
+  value: string | number;
+  title?: string;
+}) {
+  return (
+    <td title={title} className={isError ? "text-danger" : ""}>
+      {value}
+    </td>
+  );
+}
+
 export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
   const { selectedRequest, isDarkModeEnabled } = useContext(RequestContext);
   const {
@@ -122,15 +138,29 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
                 onClick={() => handleOnRequestClick(request)}
                 className={`clickable ${
                   selectedRequest?.uuid === request.uuid ? "selected" : ""
-                } ${request.response.status >= 400 ? "text-danger" : ""}`}
+                }`}
               >
-                <td scope="row">{index}</td>
-                <td title={request.request.url}>
-                  {request.request.truncatedUrl}
-                </td>
-                <td>{request.response.status}</td>
-                <td>{request.request.method}</td>
-                <td>{request.time.toPrecision(2)} ms</td>
+                <ErrorrableTd
+                  isError={request.response.status >= 400}
+                  value={index}
+                ></ErrorrableTd>
+                <ErrorrableTd
+                  title={request.request.url}
+                  isError={request.response.status >= 400}
+                  value={request.request.truncatedUrl}
+                ></ErrorrableTd>
+                <ErrorrableTd
+                  isError={request.response.status >= 400}
+                  value={request.response.status}
+                ></ErrorrableTd>
+                <ErrorrableTd
+                  isError={request.response.status >= 400}
+                  value={request.request.method}
+                ></ErrorrableTd>
+                <ErrorrableTd
+                  isError={request.response.status >= 400}
+                  value={request.time.toPrecision(2) + " ms"}
+                ></ErrorrableTd>
               </tr>
             ))}
             {filteredRequests.length === 0 && (
