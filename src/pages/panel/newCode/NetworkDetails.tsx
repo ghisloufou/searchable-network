@@ -1,9 +1,26 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { RequestContext } from "./Panel";
 import { ReactJSONEditor } from "./ReactJSONEditor";
+import { getDiff } from "json-difference";
 
 export function NetworkDetails() {
   const { selectedRequest } = useContext(RequestContext);
+
+  useEffect(() => {
+    // Get JsonDiff delta
+    if (
+      selectedRequest?.request?.requestContent &&
+      selectedRequest?.response?.responseContent
+    ) {
+      const diff = getDiff(
+        selectedRequest.request.requestContent,
+        selectedRequest.response.responseContent,
+        true
+      );
+
+      console.log("diff", diff);
+    }
+  }, [selectedRequest]);
 
   const [isResponseDisplayed, setIsResponseDisplayed] =
     useState<boolean>(false);
