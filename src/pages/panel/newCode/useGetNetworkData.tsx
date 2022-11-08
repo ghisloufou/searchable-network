@@ -8,6 +8,7 @@ export function useGetNetworkData() {
     NetworkRequestEnhanced[]
   >([]);
   const [filters, setFilters] = useState<string[]>([]);
+  const [ignoreFilters, setIgnoreFilters] = useState<string[]>([]);
   const searchRef = useRef<HTMLInputElement>(null);
   const tableRef = useRef<HTMLDivElement>(null);
 
@@ -37,9 +38,10 @@ export function useGetNetworkData() {
     };
   }, []);
 
-  useEffect(() => {
-    scrollToBottom(tableRef.current);
-  }, [filteredRequests]);
+  // useEffect(() => {
+  //   console.log("tableRef.current.scrollHeight", tableRef.current.scrollHeight);
+  //   scrollToBottom(tableRef.current);
+  // }, [filteredRequests]);
 
   useEffect(() => {
     if (chrome.storage) {
@@ -47,24 +49,29 @@ export function useGetNetworkData() {
     } else {
       console.error("chrome.storage.local is undefined");
     }
+    setIgnoreFilters(filters.filter((filter) => filter[0] === "-"));
   }, [filters]);
 
   useEffect(() => {
     setFilteredRequests(
       requests.filter(
         (request) =>
+          !!request &&
           filters.every((filter) => {
             if (filter[0] === "-") {
               return !request.request.truncatedUrl.includes(filter.slice(1));
             }
             return request.request.truncatedUrl.includes(filter);
-          }) && request.request.method !== "OPTIONS"
+          }) &&
+          request.request.method !== "OPTIONS"
       )
     );
   }, [requests, filters]);
 
   const onRequestFinishedListener = (request: NetworkRequest) => {
-    // do not show requests to chrome extension resources
+    if (!request) {
+      return;
+    }
     const newRequest = getEnhancedRequest(request);
 
     setRequests((requests) => {
@@ -94,12 +101,15 @@ export function useGetNetworkData() {
 
   function loadPreviousRequests() {
     chrome.devtools.network.getHAR((harLog) => {
-      setRequests((requests) => {
-        if (!requests.length) {
-          return harLog.entries.map(getEnhancedRequest);
-        }
-        return requests;
-      });
+      if (harLog.entries.some((e) => e === undefined)) {
+        console.warn("Some previous entries are undefined");
+      }
+      setRequests(
+        harLog.entries
+          .slice(-200)
+          .filter((entry) => entry !== undefined)
+          .map(getEnhancedRequest)
+      );
     });
   }
 
@@ -123,6 +133,7 @@ export function useGetNetworkData() {
     loadPreviousRequests,
     updateResponseContent,
     filters,
+    ignoreFilters,
     tableRef,
     searchRef,
   };
@@ -142,7 +153,6 @@ function getEnhancedRequest(request: NetworkRequest): NetworkRequestEnhanced {
   } catch {}
 
   const newRequest = request as NetworkRequestEnhanced;
-
   newRequest.request.requestContent = requestContent;
   newRequest.request.truncatedUrl = request.request.url
     .split("/")

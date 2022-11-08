@@ -41,7 +41,7 @@ export function ReactJSONEditor({ content }: ReactJSONEditorProps) {
 
   return (
     <>
-      <input
+      {/* <input
         type="text"
         ref={jsonSearchRef}
         onKeyDown={(e) => {
@@ -49,13 +49,13 @@ export function ReactJSONEditor({ content }: ReactJSONEditorProps) {
             setJsonSearchTerm(jsonSearchRef.current.value);
           }
         }}
-      />
+      /> */}
       <div
         style={{ display: "flex", flex: 1 }}
-        className={isDarkModeEnabled && "jse-theme-dark"}
+        className={isDarkModeEnabled ? "jse-theme-dark" : null}
         ref={refContainer}
       ></div>
-      <ReactJson
+      {/* <ReactJson
         src={content}
         theme={isDarkModeEnabled ? "monokai" : "rjv-default"}
         shouldCollapse={(field) =>
@@ -64,7 +64,7 @@ export function ReactJSONEditor({ content }: ReactJSONEditorProps) {
         enableClipboard={false}
         displayDataTypes={false}
         displayObjectSize={false}
-      />
+      /> */}
     </>
   );
 }

@@ -16,7 +16,10 @@ function ErrorrableTd({
   title?: string;
 }) {
   return (
-    <td title={title} className={isError ? "text-danger" : ""}>
+    <td
+      title={title}
+      className={`text-truncate ${isError ? "text-danger" : ""}`}
+    >
       {value}
     </td>
   );
@@ -27,6 +30,7 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
   const {
     filteredRequests,
     filters,
+    ignoreFilters,
     searchRef,
     tableRef,
     addFilter,
@@ -99,16 +103,16 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
         >
           Clear
         </button>
-        {!filters.length && !filteredRequests.length && (
-          <button
-            onClick={() => loadPreviousRequests()}
-            className={`btn btn-${isDarkModeEnabled ? "dark" : "light"}`}
-          >
-            Load previous data
-          </button>
-        )}
+        {(!filters.length || ignoreFilters.length === filters.length) &&
+          !filteredRequests.length && (
+            <button
+              onClick={() => loadPreviousRequests()}
+              className={`btn btn-${isDarkModeEnabled ? "dark" : "light"}`}
+            >
+              Load previous data
+            </button>
+          )}
       </div>
-
       <div
         ref={tableRef}
         style={{ maxHeight: "400px" }}
