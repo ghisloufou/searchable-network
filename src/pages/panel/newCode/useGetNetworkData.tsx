@@ -70,8 +70,14 @@ export function useGetNetworkData() {
 
   const onRequestFinishedListener = (request: NetworkRequest) => {
     if (!request) {
+      console.error("Error with this request:", request);
       return;
     }
+
+    if (request.request.url.startsWith("chrome-extension://")) {
+      return;
+    }
+
     const newRequest = getEnhancedRequest(request);
 
     setRequests((requests) => {
@@ -107,22 +113,32 @@ export function useGetNetworkData() {
       setRequests(
         harLog.entries
           .slice(-200)
-          .filter((entry) => entry !== undefined)
-          .map(getEnhancedRequest)
+          .filter(
+            (entry) =>
+              !!entry && !entry.request.url.startsWith("chrome-extension://")
+          )
+          .map((entry) => {
+            const res = getEnhancedRequest(entry as NetworkRequest);
+            if (!res) {
+              return null;
+            }
+            return res;
+          })
+          .filter((res) => !!res)
       );
     });
   }
 
-  function updateResponseContent(requestToUpdate: NetworkRequestEnhanced) {
-    setRequests((requests) =>
-      requests.map((request) => {
-        if (request.uuid === requestToUpdate.uuid) {
-          request.response.responseContent =
-            requestToUpdate.response.responseContent;
-        }
-        return request;
-      })
-    );
+  function updateResponseContentInRequests(
+    requestToUpdate: NetworkRequestEnhanced
+  ) {
+    setRequests((requests) => {
+      const index = requests.findIndex(
+        (rq) => rq.uuid === requestToUpdate.uuid
+      );
+      requests[index] = requestToUpdate;
+      return requests;
+    });
   }
 
   return {
@@ -131,7 +147,7 @@ export function useGetNetworkData() {
     removeFilter,
     clearFilters,
     loadPreviousRequests,
-    updateResponseContent,
+    updateResponseContentInRequests,
     filters,
     ignoreFilters,
     tableRef,
@@ -144,9 +160,6 @@ function scrollToBottom(element: HTMLDivElement) {
 }
 
 function getEnhancedRequest(request: NetworkRequest): NetworkRequestEnhanced {
-  if (request.request.url.startsWith("chrome-extension://")) {
-    return;
-  }
   let requestContent = { no: "request found" };
   try {
     requestContent = JSON.parse(request.request.postData.text);

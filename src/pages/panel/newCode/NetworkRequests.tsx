@@ -7,19 +7,14 @@ type NetworkRequestsProps = {
 };
 
 function ErrorrableTd({
-  isError,
   value,
   title,
 }: {
-  isError: boolean;
   value: string | number;
   title?: string;
 }) {
   return (
-    <td
-      title={title}
-      className={`text-truncate ${isError ? "text-danger" : ""}`}
-    >
+    <td title={title} className="text-truncate">
       {value}
     </td>
   );
@@ -37,27 +32,13 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
     removeFilter,
     clearFilters,
     loadPreviousRequests,
-    updateResponseContent,
+    updateResponseContentInRequests,
   } = useGetNetworkData();
 
-  const handleOnRequestClick = (request: NetworkRequestEnhanced) => {
-    if (!request.response.responseContent) {
-      request.getContent((responseContentUnparsed) => {
-        let responseContent = { no: "response found" };
-        try {
-          responseContent = JSON.parse(responseContentUnparsed);
-        } catch {}
-        const requestWithResponseContent = {
-          ...request,
-          response: {
-            ...request.response,
-            responseContent,
-          },
-        };
-        onRequestClick(requestWithResponseContent);
-        updateResponseContent(requestWithResponseContent);
-      });
-    }
+  const handleOnRequestClick = async (request: NetworkRequestEnhanced) => {
+    const requestWithContent = await getNetworkRequestWithContent(request);
+    updateResponseContentInRequests(requestWithContent);
+    onRequestClick(requestWithContent);
   };
 
   return (
@@ -141,28 +122,17 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
                 key={request.uuid}
                 onClick={() => handleOnRequestClick(request)}
                 className={`clickable ${
-                  selectedRequest?.uuid === request.uuid ? "selected" : ""
-                }`}
+                  selectedRequest?.uuid === request.uuid ? "selected" : null
+                } ${request.response.status >= 400 ? "text-danger" : null}`}
               >
-                <ErrorrableTd
-                  isError={request.response.status >= 400}
-                  value={index}
-                ></ErrorrableTd>
+                <ErrorrableTd value={index}></ErrorrableTd>
                 <ErrorrableTd
                   title={request.request.url}
-                  isError={request.response.status >= 400}
                   value={request.request.truncatedUrl}
                 ></ErrorrableTd>
+                <ErrorrableTd value={request.response.status}></ErrorrableTd>
+                <ErrorrableTd value={request.request.method}></ErrorrableTd>
                 <ErrorrableTd
-                  isError={request.response.status >= 400}
-                  value={request.response.status}
-                ></ErrorrableTd>
-                <ErrorrableTd
-                  isError={request.response.status >= 400}
-                  value={request.request.method}
-                ></ErrorrableTd>
-                <ErrorrableTd
-                  isError={request.response.status >= 400}
                   value={request.time.toPrecision(2) + " ms"}
                 ></ErrorrableTd>
               </tr>
@@ -185,3 +155,35 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
     </section>
   );
 }
+
+async function getNetworkRequestWithContent(
+  request: NetworkRequestEnhanced
+): Promise<NetworkRequestEnhanced> {
+  let requestWithResponseContent = request;
+  await getResponseContent(request).then((responseContent) => {
+    requestWithResponseContent = {
+      ...request,
+      response: {
+        ...request.response,
+        responseContent,
+      },
+    };
+  });
+  return requestWithResponseContent;
+}
+
+const getResponseContent = (request: NetworkRequestEnhanced) =>
+  new Promise((resolve) => {
+    if (!request.getContent) {
+      resolve({ Error: "Cannot get response." });
+    }
+    request.getContent((res) => {
+      let responseContent = {} as any;
+      try {
+        responseContent = JSON.parse(res);
+      } catch {
+        responseContent = { Response: "No response found" };
+      }
+      resolve(responseContent);
+    });
+  });
