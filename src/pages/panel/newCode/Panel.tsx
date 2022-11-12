@@ -2,6 +2,7 @@ import React, { createContext, useEffect, useState } from "react";
 import { NetworkRequests } from "./NetworkRequests";
 import { NetworkDetails } from "./NetworkDetails";
 import "./Panel.scss";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 export type NetworkRequest = chrome.devtools.network.Request;
 export type NetworkRequestEnhanced = NetworkRequest & {
@@ -43,10 +44,12 @@ export function Panel() {
   return (
     <div>
       <RequestContext.Provider value={{ selectedRequest, isDarkModeEnabled }}>
-        <NetworkRequests
-          onRequestClick={(request) => setSelectedRequest(request)}
-        />
-        <NetworkDetails />
+        <ErrorBoundary selectedRequest={selectedRequest}>
+          <NetworkRequests
+            onRequestClick={(request) => setSelectedRequest(request)}
+          />
+          <NetworkDetails />
+        </ErrorBoundary>
       </RequestContext.Provider>
     </div>
   );
