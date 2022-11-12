@@ -36,7 +36,7 @@ export function NetworkDetails() {
               }`}
               onClick={() => setIsResponseDisplayed(false)}
             >
-              Request
+              Request content
             </button>
           </li>
           <li className="nav-item">
@@ -46,7 +46,7 @@ export function NetworkDetails() {
               }`}
               onClick={() => setIsResponseDisplayed(true)}
             >
-              Response
+              Response content
             </button>
           </li>
         </ul>
