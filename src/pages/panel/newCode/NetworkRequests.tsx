@@ -78,7 +78,7 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
             }
           }}
         />
-        {filters.length && <span className="me-1">Filters:</span>}
+        {!!filters.length && <span className="me-1">Filters:</span>}
         {filters.map((searchTerm, index) => (
           <span key={searchTerm} className="d-flex align-items-center">
             {index > 0 && <span className="ms-1">&</span>}
