@@ -160,7 +160,7 @@ function scrollToBottom(element: HTMLDivElement) {
 }
 
 function getEnhancedRequest(request: NetworkRequest): NetworkRequestEnhanced {
-  let requestContent = { Request: "not found" };
+  let requestContent = { "Request content": "not found" };
   try {
     requestContent = JSON.parse(request.request.postData.text);
   } catch {}

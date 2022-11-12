@@ -199,14 +199,14 @@ async function getNetworkRequestWithContent(
 const getResponseContent = (request: NetworkRequestEnhanced) =>
   new Promise((resolve) => {
     if (!request.getContent) {
-      resolve({ Error: "Cannot get response." });
+      resolve({ Error: "Cannot get response content." });
     }
     request.getContent((res) => {
       let responseContent = {} as any;
       try {
         responseContent = JSON.parse(res);
       } catch {
-        responseContent = { Response: "not found" };
+        responseContent = { "Response content": "not found" };
       }
       resolve(responseContent);
     });
