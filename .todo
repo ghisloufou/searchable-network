@@ -1,5 +1,5 @@
 
-- @high Fix line click not triggerring every time
+- Add auto scroll option
 
 - @high Remember the last searched values in jsoneditor to search back with a simple click
 
@@ -9,4 +9,4 @@
 
 - @high Add possibility to compare request to response
 
-- @low Add filter XHR requests only
+-  Add filter XHR requests only
