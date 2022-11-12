@@ -8,6 +8,7 @@ export function useGetNetworkData() {
     NetworkRequestEnhanced[]
   >([]);
   const [filters, setFilters] = useState<string[]>([]);
+  const [isAutoScrollEnabled, setAutoScroll] = useState<boolean>(true);
   const [ignoreFilters, setIgnoreFilters] = useState<string[]>([]);
   const searchRef = useRef<HTMLInputElement>(null);
   const tableRef = useRef<HTMLDivElement>(null);
@@ -30,18 +31,25 @@ export function useGetNetworkData() {
 
     chrome.devtools.network.onNavigated.addListener(onNavigatedListener);
 
+    tableRef.current.addEventListener("scroll", scrollListener);
+
     return () => {
       chrome.devtools.network.onRequestFinished.removeListener(
         onRequestFinishedListener
       );
       chrome.devtools.network.onNavigated.removeListener(onNavigatedListener);
+      tableRef.current.removeEventListener("scroll", scrollListener);
     };
   }, []);
 
-  // useEffect(() => {
-  //   console.log("tableRef.current.scrollHeight", tableRef.current.scrollHeight);
-  //   scrollToBottom(tableRef.current);
-  // }, [filteredRequests]);
+  useEffect(() => {
+    if (isAutoScrollEnabled) {
+      tableRef.current.scroll({
+        top: tableRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [filteredRequests]);
 
   useEffect(() => {
     if (chrome.storage) {
@@ -89,6 +97,15 @@ export function useGetNetworkData() {
     console.log("onNavigatedListener: url", url);
     // setRequests([]);
     //  todo?: display a line break in the network logs to show page reloaded
+  };
+
+  const scrollListener = () => {
+    const element = tableRef.current;
+    const isScrollNearBottomOfElement =
+      Math.abs(
+        element.scrollHeight - element.scrollTop - element.clientHeight
+      ) <= 5.0;
+    setAutoScroll(isScrollNearBottomOfElement);
   };
 
   function addFilter(value: string) {
@@ -153,10 +170,6 @@ export function useGetNetworkData() {
     tableRef,
     searchRef,
   };
-}
-
-function scrollToBottom(element: HTMLDivElement) {
-  element.scroll({ top: element.scrollHeight, behavior: "smooth" });
 }
 
 function getEnhancedRequest(request: NetworkRequest): NetworkRequestEnhanced {
