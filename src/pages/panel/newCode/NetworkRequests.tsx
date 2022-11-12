@@ -114,6 +114,7 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
               <th scope="col">Status</th>
               <th scope="col">Method</th>
               <th scope="col">Duration</th>
+              <th scope="col">Type</th>
             </tr>
           </thead>
           <tbody>
@@ -135,6 +136,7 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
                 <ErrorrableTd
                   value={request.time.toPrecision(2) + " ms"}
                 ></ErrorrableTd>
+                <ErrorrableTd value={request.response.type}></ErrorrableTd>
               </tr>
             ))}
             {filteredRequests.length === 0 && (
@@ -143,6 +145,7 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
                   {filters.length > 0 &&
                     "No query found with these search terms."}
                 </td>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>

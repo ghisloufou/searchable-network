@@ -172,6 +172,9 @@ function getEnhancedRequest(request: NetworkRequest): NetworkRequestEnhanced {
     .slice(-2)
     .join("/");
   newRequest.uuid = uuidv4();
+  newRequest.response.type =
+    Object.entries(newRequest).find(([key]) => key === "_resourceType")[1] ??
+    "n/a";
 
   return newRequest;
 }

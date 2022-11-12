@@ -13,6 +13,7 @@ export type NetworkRequestEnhanced = NetworkRequest & {
   uuid: string;
   response: {
     responseContent?: any;
+    type?: string;
   };
 };
 
