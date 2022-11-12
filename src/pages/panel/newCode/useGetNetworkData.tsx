@@ -7,6 +7,7 @@ export function useGetNetworkData() {
   const [filteredRequests, setFilteredRequests] = useState<
     NetworkRequestEnhanced[]
   >([]);
+  const [isFilterXhrEnabled, setIsFilterXhrEnabled] = useState(false);
   const [filters, setFilters] = useState<string[]>([]);
   const [isAutoScrollEnabled, setAutoScroll] = useState<boolean>(true);
   const [ignoreFilters, setIgnoreFilters] = useState<string[]>([]);
@@ -62,19 +63,33 @@ export function useGetNetworkData() {
 
   useEffect(() => {
     setFilteredRequests(
-      requests.filter(
-        (request) =>
+      requests.filter((request) => {
+        const resourceType = Object.entries(request).find(
+          ([key]) => key === "_resourceType"
+        );
+
+        const isXhrFiltered =
+          (isFilterXhrEnabled &&
+            resourceType &&
+            (resourceType[1] == "xhr" || resourceType[1] == "fetch")) ||
+          !isFilterXhrEnabled;
+
+        const isRequestInFilters = filters.every((filter) => {
+          if (filter[0] === "-") {
+            return !request.request.truncatedUrl.includes(filter.slice(1));
+          }
+          return request.request.truncatedUrl.includes(filter);
+        });
+
+        return (
           !!request &&
-          filters.every((filter) => {
-            if (filter[0] === "-") {
-              return !request.request.truncatedUrl.includes(filter.slice(1));
-            }
-            return request.request.truncatedUrl.includes(filter);
-          }) &&
-          request.request.method !== "OPTIONS"
-      )
+          isRequestInFilters &&
+          request.request.method !== "OPTIONS" &&
+          isXhrFiltered
+        );
+      })
     );
-  }, [requests, filters]);
+  }, [requests, filters, isFilterXhrEnabled]);
 
   const onRequestFinishedListener = (request: NetworkRequest) => {
     if (!request) {
@@ -165,10 +180,12 @@ export function useGetNetworkData() {
     clearFilters,
     loadPreviousRequests,
     updateResponseContentInRequests,
+    setIsFilterXhrEnabled,
     filters,
     ignoreFilters,
     tableRef,
     searchRef,
+    isFilterXhrEnabled,
   };
 }
 

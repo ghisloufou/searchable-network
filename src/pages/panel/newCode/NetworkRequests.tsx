@@ -17,11 +17,13 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
     ignoreFilters,
     searchRef,
     tableRef,
+    isFilterXhrEnabled,
     addFilter,
     removeFilter,
     clearFilters,
     loadPreviousRequests,
     updateResponseContentInRequests,
+    setIsFilterXhrEnabled,
   } = useGetNetworkData();
 
   const handleOnRequestClick = async (request: NetworkRequestEnhanced) => {
@@ -33,6 +35,7 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
   return (
     <section>
       <NetworkRequestsToolbar
+        isFilterXhrEnabled={isFilterXhrEnabled}
         filteredRequests={filteredRequests}
         filters={filters}
         ignoreFilters={ignoreFilters}
@@ -41,6 +44,7 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
         removeFilter={removeFilter}
         clearFilters={clearFilters}
         loadPreviousRequests={loadPreviousRequests}
+        setIsFilterXhrEnabled={setIsFilterXhrEnabled}
       ></NetworkRequestsToolbar>
 
       <div

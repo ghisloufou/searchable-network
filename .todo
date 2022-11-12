@@ -5,7 +5,3 @@
     - Add possibility to hide de request/response details panel
 
 - @high Add possibility to compare request to response
-
--  Add filter XHR requests only
-
-- Better separate code components

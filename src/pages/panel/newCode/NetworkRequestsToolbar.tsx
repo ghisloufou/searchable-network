@@ -4,12 +4,14 @@ import { NetworkRequestEnhanced, RequestContext } from "./Panel";
 type NetworkRequestsToolbarProps = {
   searchRef: MutableRefObject<HTMLInputElement>;
   filters: string[];
+  isFilterXhrEnabled: boolean;
   ignoreFilters: string[];
   filteredRequests: NetworkRequestEnhanced[];
   removeFilter: (index: number) => void;
   addFilter: (value: string) => void;
   clearFilters: () => void;
   loadPreviousRequests: () => void;
+  setIsFilterXhrEnabled: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export function NetworkRequestsToolbar({
@@ -17,10 +19,12 @@ export function NetworkRequestsToolbar({
   filters,
   ignoreFilters,
   filteredRequests,
+  isFilterXhrEnabled,
   clearFilters,
   removeFilter,
   addFilter,
   loadPreviousRequests,
+  setIsFilterXhrEnabled,
 }: NetworkRequestsToolbarProps) {
   const { isDarkModeEnabled } = useContext(RequestContext);
   return (
@@ -62,7 +66,7 @@ export function NetworkRequestsToolbar({
       <div className="d-flex flex-wrap align-items-center">
         <button
           onClick={() => clearFilters()}
-          className={`btn btn-${isDarkModeEnabled ? "dark" : "light"}`}
+          className={`btn btn-sm btn-${isDarkModeEnabled ? "dark" : "light"}`}
         >
           Clear
         </button>
@@ -70,11 +74,27 @@ export function NetworkRequestsToolbar({
           !filteredRequests.length && (
             <button
               onClick={() => loadPreviousRequests()}
-              className={`btn btn-${isDarkModeEnabled ? "dark" : "light"}`}
+              className={`btn btn-sm btn-${
+                isDarkModeEnabled ? "dark" : "light"
+              }`}
             >
               Load previous data
             </button>
           )}
+
+        <div className="form-check form-switch">
+          <input
+            className="form-check-input"
+            type="checkbox"
+            role="switch"
+            id="filter-xhr"
+            checked={isFilterXhrEnabled}
+            onChange={() => setIsFilterXhrEnabled((value) => !value)}
+          />
+          <label className="form-check-label" htmlFor="filter-xhr">
+            Only fetch/xhr
+          </label>
+        </div>
       </div>
     </>
   );
