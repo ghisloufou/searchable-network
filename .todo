@@ -1,0 +1,12 @@
+
+- @high Fix line click not triggerring every time
+
+- @high Remember the last searched values in jsoneditor to search back with a simple click
+
+- Improve layout vertical responsiveness
+    - Add possibility to enlarge request/body details panel
+    - Add possibility to hide de request/response details panel
+
+- @high Add possibility to compare request to response
+
+- @low Add filter XHR requests only
