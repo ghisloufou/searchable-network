@@ -2,24 +2,36 @@
   background-color: red !important;
 }
 
-.clickable {
-  cursor: pointer;
-  td:hover {
-    background-color: #384048;
-  }
-}
-
-.selected {
-  td {
-    background-color: #384048;
-  }
-}
-
 .custom-table {
   th,
   td {
     word-wrap: break-word;
     max-width: 150px;
-    font-size: small;
+    font-size: 0.72rem;
+    padding: 0.15rem 0.5rem;
+    font-family: Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+
+  .clickable {
+    cursor: pointer;
+    &:not(.selected):hover {
+      td {
+        background: rgb(47, 47, 87);
+        box-shadow: none;
+      }
+    }
+  }
+
+  .selected {
+    td {
+      background: rgb(0, 140, 255);
+      box-shadow: none;
+    }
+
+    &.request-error {
+      td {
+        background: rgb(255 0 0 / 20%);
+      }
+    }
   }
 }

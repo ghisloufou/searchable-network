@@ -52,7 +52,7 @@ export function ReactJSONEditor({ content }: ReactJSONEditorProps) {
       /> */}
       <div
         style={{ display: "flex", flex: 1 }}
-        className={isDarkModeEnabled ? "jse-theme-dark" : null}
+        className={isDarkModeEnabled ? "jse-theme-dark" : ""}
         ref={refContainer}
       ></div>
       {/* <ReactJson

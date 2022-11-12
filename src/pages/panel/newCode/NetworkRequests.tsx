@@ -9,12 +9,17 @@ type NetworkRequestsProps = {
 function ErrorrableTd({
   value,
   title,
+  isError,
 }: {
   value: string | number;
   title?: string;
+  isError: boolean;
 }) {
   return (
-    <td title={title} className="text-truncate">
+    <td
+      title={title}
+      className={`${isError ? "text-danger" : ""} text-truncate`}
+    >
       {value}
     </td>
   );
@@ -118,27 +123,43 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
             </tr>
           </thead>
           <tbody>
-            {filteredRequests.map((request, index) => (
-              <tr
-                key={request.uuid}
-                onClick={() => handleOnRequestClick(request)}
-                className={`clickable ${
-                  selectedRequest?.uuid === request.uuid ? "selected" : null
-                } ${request.response.status >= 400 ? "text-danger" : null}`}
-              >
-                <ErrorrableTd value={index}></ErrorrableTd>
-                <ErrorrableTd
-                  title={request.request.url}
-                  value={request.request.truncatedUrl}
-                ></ErrorrableTd>
-                <ErrorrableTd value={request.response.status}></ErrorrableTd>
-                <ErrorrableTd value={request.request.method}></ErrorrableTd>
-                <ErrorrableTd
-                  value={request.time.toPrecision(2) + " ms"}
-                ></ErrorrableTd>
-                <ErrorrableTd value={request.response.type}></ErrorrableTd>
-              </tr>
-            ))}
+            {filteredRequests.map((request, index) => {
+              const isError = request.response.status >= 400;
+              return (
+                <tr
+                  key={request.uuid}
+                  onClick={() => handleOnRequestClick(request)}
+                  className={`clickable ${
+                    selectedRequest?.uuid === request.uuid ? "selected" : ""
+                  } ${
+                    isError ? "request-error" : ""
+                  }`}
+                >
+                  <ErrorrableTd isError={isError} value={index} />
+                  <ErrorrableTd
+                    isError={isError}
+                    title={request.request.url}
+                    value={request.request.truncatedUrl}
+                  />
+                  <ErrorrableTd
+                    isError={isError}
+                    value={request.response.status}
+                  />
+                  <ErrorrableTd
+                    isError={isError}
+                    value={request.request.method}
+                  />
+                  <ErrorrableTd
+                    isError={isError}
+                    value={request.time.toPrecision(2) + " ms"}
+                  />
+                  <ErrorrableTd
+                    isError={isError}
+                    value={request.response.type}
+                  />
+                </tr>
+              );
+            })}
             {filteredRequests.length === 0 && (
               <tr>
                 <td scope="row">
@@ -185,7 +206,7 @@ const getResponseContent = (request: NetworkRequestEnhanced) =>
       try {
         responseContent = JSON.parse(res);
       } catch {
-        responseContent = { Response: "No response found" };
+        responseContent = { Response: "not found" };
       }
       resolve(responseContent);
     });
