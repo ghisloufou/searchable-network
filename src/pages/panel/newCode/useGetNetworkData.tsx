@@ -22,6 +22,10 @@ export function useGetNetworkData() {
           setFilters(storedFilters);
         }
       });
+      chrome.storage.local.get(["isFilterXhrEnabled"], (storage) => {
+        const storedFilters = storage["isFilterXhrEnabled"];
+        setIsFilterXhrEnabled(!!storedFilters);
+      });
     } else {
       console.error("chrome.storage.local is undefined");
     }
@@ -56,10 +60,18 @@ export function useGetNetworkData() {
     if (chrome.storage) {
       chrome.storage.local.set({ filters });
     } else {
-      console.error("chrome.storage.local is undefined");
+      console.info("chrome.storage.local is undefined");
     }
     setIgnoreFilters(filters.filter((filter) => filter[0] === "-"));
   }, [filters]);
+
+  useEffect(() => {
+    if (chrome.storage) {
+      chrome.storage.local.set({ isFilterXhrEnabled });
+    } else {
+      console.info("chrome.storage.local is undefined");
+    }
+  }, [isFilterXhrEnabled]);
 
   useEffect(() => {
     setFilteredRequests(
