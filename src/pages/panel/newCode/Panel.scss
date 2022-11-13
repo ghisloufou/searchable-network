@@ -2,6 +2,15 @@
   background-color: red !important;
 }
 
+#searchInput {
+  max-width: 300px;
+  min-width: 230px;
+  border-color: darkslategray;
+  &:hover {
+    border-color: lightslategray;
+  }
+}
+
 .custom-table {
   th,
   td {

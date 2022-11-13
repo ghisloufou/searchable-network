@@ -1,7 +1,6 @@
 import { Content, JSONEditor } from "vanilla-jsoneditor";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { RequestContext } from "./Panel";
-import ReactJson from "react-json-view";
 
 type ReactJSONEditorProps = {
   content: Content;
@@ -11,8 +10,6 @@ export function ReactJSONEditor({ content }: ReactJSONEditorProps) {
   const { isDarkModeEnabled } = useContext(RequestContext);
   const refContainer = useRef(null);
   const refEditor = useRef<JSONEditor>(null);
-  const jsonSearchRef = useRef<HTMLInputElement>(null);
-  const [jsonSearchTerm, setJsonSearchTerm] = useState("");
 
   useEffect(() => {
     // create editor
@@ -41,30 +38,11 @@ export function ReactJSONEditor({ content }: ReactJSONEditorProps) {
 
   return (
     <>
-      {/* <input
-        type="text"
-        ref={jsonSearchRef}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            setJsonSearchTerm(jsonSearchRef.current.value);
-          }
-        }}
-      /> */}
       <div
         style={{ display: "flex", flex: 1 }}
         className={isDarkModeEnabled ? "jse-theme-dark" : ""}
         ref={refContainer}
       ></div>
-      {/* <ReactJson
-        src={content}
-        theme={isDarkModeEnabled ? "monokai" : "rjv-default"}
-        shouldCollapse={(field) =>
-          jsonSearchTerm && !field.name.includes(jsonSearchTerm)
-        }
-        enableClipboard={false}
-        displayDataTypes={false}
-        displayObjectSize={false}
-      /> */}
     </>
   );
 }
