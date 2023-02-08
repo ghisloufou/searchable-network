@@ -212,6 +212,7 @@ function getEnhancedRequest(request: NetworkRequest): NetworkRequestEnhanced {
     .slice(-2)
     .join("/");
   newRequest.id = ulid();
+  newRequest.response.type = newRequest["_resourceType"] as string;
 
   return newRequest;
 }
