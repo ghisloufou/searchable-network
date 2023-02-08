@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { NetworkRequest, NetworkRequestEnhanced } from "./Panel";
-import { v4 as uuidv4 } from "uuid";
+import { ulid } from "ulid";
 
 export function useGetNetworkData() {
   const [requests, setRequests] = useState<NetworkRequestEnhanced[]>([]);
@@ -177,9 +177,7 @@ export function useGetNetworkData() {
     requestToUpdate: NetworkRequestEnhanced
   ) {
     setRequests((requests) => {
-      const index = requests.findIndex(
-        (rq) => rq.uuid === requestToUpdate.uuid
-      );
+      const index = requests.findIndex((rq) => rq.id === requestToUpdate.id);
       requests[index] = requestToUpdate;
       return requests;
     });
@@ -213,10 +211,7 @@ function getEnhancedRequest(request: NetworkRequest): NetworkRequestEnhanced {
     .split("/")
     .slice(-2)
     .join("/");
-  newRequest.uuid = uuidv4();
-  newRequest.response.type =
-    Object.entries(newRequest).find(([key]) => key === "_resourceType")[1] ??
-    "n/a";
+  newRequest.id = ulid();
 
   return newRequest;
 }

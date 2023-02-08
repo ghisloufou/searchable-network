@@ -75,10 +75,10 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
               const isError = request.response.status >= 400;
               return (
                 <tr
-                  key={request.uuid}
+                  key={request.id}
                   onClick={() => handleOnRequestClick(request)}
                   className={`clickable ${
-                    selectedRequest?.uuid === request.uuid ? "selected" : ""
+                    selectedRequest?.id === request.id ? "selected" : ""
                   } ${isError ? "request-error" : ""}`}
                 >
                   <ErrorrableTd isError={isError} value={index} />

@@ -10,7 +10,7 @@ export type NetworkRequestEnhanced = NetworkRequest & {
     truncatedUrl: string;
     requestContent: any;
   };
-  uuid: string;
+  id: string;
   response: {
     responseContent?: any;
     type?: string;
