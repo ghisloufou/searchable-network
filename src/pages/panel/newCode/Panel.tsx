@@ -44,6 +44,13 @@ export function Panel() {
 
   return (
     <div>
+      <button
+        className="btn btn-sm"
+        onClick={() => setIsDarkModeEnabled((value) => !value)}
+        style={{ position: "absolute", top: "0", right: "0" }}
+      >
+        {isDarkModeEnabled ? "dark" : "light"}
+      </button>
       <RequestContext.Provider value={{ selectedRequest, isDarkModeEnabled }}>
         <ErrorBoundary selectedRequest={selectedRequest}>
           <NetworkRequests

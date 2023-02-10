@@ -1,5 +1,5 @@
-import { MutableRefObject, useContext } from "react";
-import { NetworkRequestEnhanced, RequestContext } from "../Panel";
+import { MutableRefObject } from "react";
+import { NetworkRequestEnhanced } from "../Panel";
 
 type NetworkRequestsToolbarProps = {
   searchRef: MutableRefObject<HTMLInputElement>;
@@ -26,13 +26,14 @@ export function NetworkRequestsToolbar({
   loadPreviousRequests,
   setIsFilterXhrEnabled,
 }: NetworkRequestsToolbarProps) {
-  const { isDarkModeEnabled } = useContext(RequestContext);
+  const isLoadPreviousDataButtonDisplayed =
+    (!filters.length || ignoreFilters.length === filters.length) &&
+    !filteredRequests.length;
+
   return (
     <>
-      <div className="d-flex flex-wrap align-items-center mt-1">
-        <label htmlFor="searchInput" className="ms-2 fs-6">
-          Search
-        </label>
+      <div className="d-flex flex-wrap align-items-center mt-1 ms-2">
+        <label htmlFor="searchInput">Search</label>
 
         <input
           className="form-control form-control-sm mx-2"
@@ -47,7 +48,7 @@ export function NetworkRequestsToolbar({
             }
           }}
         />
-        {!!filters.length && <span className="ms-1 me-1 fs-6">Filters:</span>}
+        {!!filters.length && <span className="ms-1 me-1">Filters:</span>}
         {filters.map((searchTerm, index) => (
           <span key={searchTerm} className="d-flex align-items-center">
             {index > 0 && <span className="ms-1">&</span>}
@@ -65,28 +66,15 @@ export function NetworkRequestsToolbar({
         ))}
       </div>
 
-      <div className="d-flex flex-wrap align-items-center">
+      <div className="d-flex flex-wrap align-items-center my-1 ms-1">
         <button
           onClick={() => clearFilters()}
-          className={`btn btn-sm btn-${
-            isDarkModeEnabled ? "dark" : "light"
-          } fs-6`}
+          className="btn btn-sm btn-secondary me-1"
         >
           Clear
         </button>
-        {(!filters.length || ignoreFilters.length === filters.length) &&
-          !filteredRequests.length && (
-            <button
-              onClick={() => loadPreviousRequests()}
-              className={`btn btn-sm btn-${
-                isDarkModeEnabled ? "dark" : "light"
-              } fs-6`}
-            >
-              Load previous data
-            </button>
-          )}
 
-        <div className="form-check form-switch">
+        <div className="form-check form-switch me-1">
           <input
             className="form-check-input"
             type="checkbox"
@@ -95,10 +83,19 @@ export function NetworkRequestsToolbar({
             checked={isFilterXhrEnabled}
             onChange={() => setIsFilterXhrEnabled((value) => !value)}
           />
-          <label className="form-check-label fs-6" htmlFor="filter-xhr">
+          <label className="form-check-label" htmlFor="filter-xhr">
             Only fetch/xhr
           </label>
         </div>
+
+        {isLoadPreviousDataButtonDisplayed && (
+          <button
+            onClick={() => loadPreviousRequests()}
+            className="btn btn-sm btn-secondary"
+          >
+            Load previous data
+          </button>
+        )}
       </div>
     </>
   );

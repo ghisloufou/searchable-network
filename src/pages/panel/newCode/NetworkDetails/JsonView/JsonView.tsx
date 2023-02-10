@@ -10,53 +10,118 @@ export function JsonView() {
     useState<boolean>(false);
 
   const [searchedValue, setSearchedValue] = useState<string>("");
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [expandAll, setExpandAll] = useState<boolean>(false);
+
+  function addSearchTerm(searchTerm: string) {
+    setSearchedValue(searchTerm);
+    setSearchHistory((history) =>
+      [searchTerm].concat(
+        history.filter((oldSearchTerm) => oldSearchTerm !== searchTerm)
+      )
+    );
+  }
 
   return (
     <section>
-      <label htmlFor="searchElementInput" className="ms-2 fs-6">
-        Search element
-      </label>
-      <input
-        className="form-control form-control-sm mx-2"
-        id="searchElementInput"
-        ref={searchRef}
-        type="text"
-        placeholder={`Search in the ${
-          isResponseDisplayed ? "response" : "request"
-        }`}
-        onKeyUp={(e) => {
-          if (e.key === "Enter" && searchRef.current.value !== "") {
-            setSearchedValue(searchRef.current.value);
-            searchRef.current.value = "";
-          }
-        }}
-      />
+      <div className="d-flex flex-wrap align-items-center my-1 ms-2">
+        <label htmlFor="searchElementInput">Search element</label>
+        <input
+          className="form-control form-control-sm mx-2"
+          id="searchElementInput"
+          style={{ width: "fit-content" }}
+          ref={searchRef}
+          type="text"
+          placeholder={`Search in the ${
+            isResponseDisplayed ? "response" : "request"
+          }`}
+          onKeyUp={(e) => {
+            if (e.key === "Enter" && searchRef.current.value !== "") {
+              addSearchTerm(searchRef.current.value);
+              searchRef.current.value = "";
+            }
+          }}
+        />
+        {searchedValue !== "" && (
+          <span className="ms-1 me-1">
+            Current:{" "}
+            <span className="btn badge badge-sm text-bg-primary ms-1">
+              {searchedValue}
+            </span>
+          </span>
+        )}
+        {searchHistory.length > 1 && (
+          <span className="ms-1 me-1">History:</span>
+        )}
+        {searchHistory.slice(1).map((searchTerm, index) => (
+          <span key={searchTerm} className="d-flex align-items-center">
+            {index > 0 && <span className="ms-1">&</span>}
+            <span
+              className="btn badge badge-sm text-bg-secondary ms-1"
+              onClick={(e) => {
+                addSearchTerm(searchTerm);
+                e.stopPropagation();
+              }}
+              title="Click to search"
+            >
+              {searchTerm}
+            </span>
+          </span>
+        ))}
+      </div>
 
-      <div>Searched value: {searchedValue}</div>
-
-      <ul className="nav nav-tabs">
-        <li className="nav-item">
-          <button
-            className={`nav-link text-white ${
-              isResponseDisplayed ? "" : "active"
-            }`}
+      <section className="mb-1 ms-1">
+        <div
+          className="btn-group me-1"
+          role="group"
+          aria-label="Json viewer body selector"
+        >
+          <input
+            type="radio"
+            className="btn-check"
+            name="btnradio"
+            id="btnradio1"
+            autoComplete="off"
+            checked={!isResponseDisplayed}
             onClick={() => setIsResponseDisplayed(false)}
+          />
+          <label
+            className="btn btn-outline-secondary btn-sm"
+            htmlFor="btnradio1"
           >
-            Request content
-          </button>
-        </li>
+            Request
+          </label>
 
-        <li className="nav-item">
-          <button
-            className={`nav-link text-white ${
-              isResponseDisplayed ? "active" : ""
-            }`}
+          <input
+            type="radio"
+            className="btn-check"
+            name="btnradio"
+            id="btnradio2"
+            autoComplete="off"
+            checked={isResponseDisplayed}
             onClick={() => setIsResponseDisplayed(true)}
+          />
+          <label
+            className="btn btn-outline-secondary btn-sm"
+            htmlFor="btnradio2"
           >
-            Response content
-          </button>
-        </li>
-      </ul>
+            Response
+          </label>
+        </div>
+
+        <button
+          onClick={() => setExpandAll(false)}
+          className="btn btn-secondary btn-sm me-1"
+        >
+          Collapse all
+        </button>
+        <button
+          onClick={() => setExpandAll(true)}
+          className="btn btn-secondary btn-sm me-1"
+        >
+          Expand all
+        </button>
+      </section>
 
       <ReactJSONEditor
         content={{
@@ -67,7 +132,8 @@ export function JsonView() {
           },
         }}
         isDarkModeEnabled={isDarkModeEnabled}
-        searchedValue={searchedValue}
+        searchValue={searchedValue}
+        expandAll={expandAll}
       />
     </section>
   );
