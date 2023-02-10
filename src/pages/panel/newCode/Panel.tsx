@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
-import { NetworkRequests } from "./NetworkRequests";
-import { NetworkDetails } from "./NetworkDetails";
+import { NetworkRequests } from "./NetworkRequests/NetworkRequests";
+import { NetworkDetails } from "./NetworkDetails/NetworkDetails";
 import "./Panel.scss";
 import { ErrorBoundary } from "./ErrorBoundary";
 

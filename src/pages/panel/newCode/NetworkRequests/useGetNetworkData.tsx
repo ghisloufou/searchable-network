@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { NetworkRequest, NetworkRequestEnhanced } from "./Panel";
+import { NetworkRequest, NetworkRequestEnhanced } from "../Panel";
 import { ulid } from "ulid";
 
 export function useGetNetworkData() {
