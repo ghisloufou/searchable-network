@@ -35,6 +35,7 @@ specifiers:
   react-diff-viewer-continued: ^3.2.5
   react-dom: 18.2.0
   react-highlight-words: ^0.20.0
+  react-icons: ^4.7.1
   rollup: 2.79.1
   sass: ^1.56.1
   ts-jest: 29.0.3
@@ -55,6 +56,7 @@ dependencies:
   react-diff-viewer-continued: 3.2.5_biqbaboplfbrettd7655fr4n2y
   react-dom: 18.2.0_react@18.2.0
   react-highlight-words: 0.20.0_react@18.2.0
+  react-icons: 4.7.1_react@18.2.0
   vanilla-jsoneditor: 0.10.4
 
 devDependencies:
@@ -4256,6 +4258,14 @@ packages:
       highlight-words-core: 1.2.2
       memoize-one: 4.0.3
       prop-types: 15.8.1
+      react: 18.2.0
+    dev: false
+
+  /react-icons/4.7.1_react@18.2.0:
+    resolution: {integrity: sha512-yHd3oKGMgm7zxo3EA7H2n7vxSoiGmHk5t6Ou4bXsfcgWyhfDKMpyKfhHR6Bjnn63c+YXBLBPUql9H4wPJM6sXw==}
+    peerDependencies:
+      react: '*'
+    dependencies:
       react: 18.2.0
     dev: false
 

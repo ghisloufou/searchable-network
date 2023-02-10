@@ -1,8 +1,9 @@
-import React, { createContext, useEffect, useState } from "react";
-import { NetworkRequests } from "./NetworkRequests/NetworkRequests";
-import { NetworkDetails } from "./NetworkDetails/NetworkDetails";
-import "./Panel.scss";
+import { createContext, useEffect, useState } from "react";
+import { FiMoon, FiSun } from "react-icons/fi";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { NetworkDetails } from "./NetworkDetails/NetworkDetails";
+import { NetworkRequests } from "./NetworkRequests/NetworkRequests";
+import "./Panel.scss";
 
 export type NetworkRequest = chrome.devtools.network.Request;
 export type NetworkRequestEnhanced = NetworkRequest & {
@@ -48,8 +49,9 @@ export function Panel() {
         className="btn btn-sm"
         onClick={() => setIsDarkModeEnabled((value) => !value)}
         style={{ position: "absolute", top: "0", right: "0" }}
+        title={`Switch to ${isDarkModeEnabled ? "light" : "dark"} mode`}
       >
-        {isDarkModeEnabled ? "dark" : "light"}
+        {isDarkModeEnabled ? <FiSun /> : <FiMoon />}
       </button>
       <RequestContext.Provider value={{ selectedRequest, isDarkModeEnabled }}>
         <ErrorBoundary selectedRequest={selectedRequest}>

@@ -32,21 +32,6 @@ export function ReactJSONEditor({
   const [foundPaths, setFoundPaths] = useState<JSONPath[]>([]);
   const [elementsFoundCount, setElementsFoundCount] = useState<number>(0);
 
-  function createOnClassName(searchedValue: string, foundPaths: JSONPath[]) {
-    return (path: JSONPath, value: unknown) => {
-      if (String(value) === searchedValue) {
-        return "green-background";
-      }
-      if (
-        foundPaths.some(
-          (foundPath) => JSON.stringify(path) === JSON.stringify(foundPath)
-        )
-      ) {
-        return "red-background";
-      }
-    };
-  }
-
   useEffect(() => {
     // create editor
     refEditor.current = new JSONEditor({
@@ -68,16 +53,15 @@ export function ReactJSONEditor({
 
   useEffect(() => {
     if (refEditor.current) {
-      refEditor.current.expand((path) => (expandAll ? true : path.length < 2));
-    }
-  }, [expandAll]);
-
-  // update editor content
-  useEffect(() => {
-    if (refEditor.current) {
       refEditor.current.update(content);
     }
   }, [content]);
+
+  useEffect(() => {
+    if (refEditor.current) {
+      refEditor.current.expand((path) => (expandAll ? true : path.length < 2));
+    }
+  }, [expandAll]);
 
   useEffect(() => {
     hightLightSearchedValue();
@@ -138,10 +122,6 @@ export function ReactJSONEditor({
     } catch (e) {
       console.error("An error ocurred while searching in the json", e);
     }
-
-    function transformPath(path: jsonPath.PathComponent[]): string[] {
-      return path.slice(2).map((element) => String(element));
-    }
   }
 
   return (
@@ -154,4 +134,23 @@ export function ReactJSONEditor({
       ></div>
     </>
   );
+}
+
+function createOnClassName(searchedValue: string, foundPaths: JSONPath[]) {
+  return (path: JSONPath, value: unknown) => {
+    if (String(value) === searchedValue) {
+      return "green-background";
+    }
+    if (
+      foundPaths.some(
+        (foundPath) => JSON.stringify(path) === JSON.stringify(foundPath)
+      )
+    ) {
+      return "red-background";
+    }
+  };
+}
+
+function transformPath(path: jsonPath.PathComponent[]): string[] {
+  return path.slice(2).map((element) => String(element));
 }

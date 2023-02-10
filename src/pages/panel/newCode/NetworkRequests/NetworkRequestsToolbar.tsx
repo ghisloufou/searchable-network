@@ -1,4 +1,6 @@
 import { MutableRefObject } from "react";
+import { FiSearch, FiSlash } from "react-icons/fi";
+import { ThemeIconProvider } from "../../utils/ThemeIconProvider";
 import { NetworkRequestEnhanced } from "../Panel";
 
 type NetworkRequestsToolbarProps = {
@@ -26,14 +28,14 @@ export function NetworkRequestsToolbar({
   loadPreviousRequests,
   setIsFilterXhrEnabled,
 }: NetworkRequestsToolbarProps) {
-  const isLoadPreviousDataButtonDisplayed =
-    (!filters.length || ignoreFilters.length === filters.length) &&
-    !filteredRequests.length;
-
   return (
     <>
       <div className="d-flex flex-wrap align-items-center mt-1 ms-2">
-        <label htmlFor="searchInput">Search</label>
+        <label htmlFor="searchInput">
+          <ThemeIconProvider>
+            <FiSearch />
+          </ThemeIconProvider>
+        </label>
 
         <input
           className="form-control form-control-sm mx-2"
@@ -67,14 +69,13 @@ export function NetworkRequestsToolbar({
       </div>
 
       <div className="d-flex flex-wrap align-items-center my-1 ms-1">
-        <button
-          onClick={() => clearFilters()}
-          className="btn btn-sm btn-secondary me-1"
-        >
-          Clear
-        </button>
+        <span onClick={() => clearFilters()} className="me-1 icon-btn">
+          <ThemeIconProvider>
+            <FiSlash />
+          </ThemeIconProvider>
+        </span>
 
-        <div className="form-check form-switch me-1">
+        <div className="form-check me-1">
           <input
             className="form-check-input"
             type="checkbox"
@@ -88,14 +89,15 @@ export function NetworkRequestsToolbar({
           </label>
         </div>
 
-        {isLoadPreviousDataButtonDisplayed && (
-          <button
-            onClick={() => loadPreviousRequests()}
-            className="btn btn-sm btn-secondary"
-          >
-            Load previous data
-          </button>
-        )}
+        {(!filters.length || ignoreFilters.length === filters.length) &&
+          !filteredRequests.length && (
+            <button
+              onClick={() => loadPreviousRequests()}
+              className="btn btn-sm btn-secondary"
+            >
+              Load previous data
+            </button>
+          )}
       </div>
     </>
   );
