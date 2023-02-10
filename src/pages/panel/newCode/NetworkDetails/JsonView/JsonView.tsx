@@ -77,11 +77,10 @@ export function JsonView() {
         )}
         {searchHistory
           .filter((_, index) => (searchedValue !== "" ? index > 0 : true))
-          .map((searchTerm, index) => (
+          .map((searchTerm) => (
             <span key={searchTerm} className="d-flex align-items-center">
-              {index > 0 && <span className="ms-1">&</span>}
               <span
-                className="btn badge badge-sm text-bg-secondary ms-1"
+                className="btn badge badge-sm text-bg-secondary ms-1 hover-bg-primary"
                 onClick={(e) => {
                   addSearchTerm(searchTerm);
                   e.stopPropagation();

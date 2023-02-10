@@ -88,33 +88,46 @@ export function ReactJSONEditor({
       return;
     }
     try {
-      const foundStringValuePaths = jsonPath
-        .paths(content, `$..[?(/^${searchValue}$/i.test(@))]`)
-        .map(transformPath);
+      const foundStringValuePaths = jsonPath.paths(
+        content,
+        `$..[?(/^${searchValue}$/i.test(@))]`
+      );
 
-      const foundOtherValuePaths = jsonPath
-        .paths(content, `$..[?(@ === ${searchValue})]`)
-        .map(transformPath);
+      const foundOtherValuePaths = jsonPath.paths(
+        content,
+        `$..[?(@ === ${searchValue})]`
+      );
 
-      const foundValuePaths =
-        foundStringValuePaths.concat(foundOtherValuePaths);
+      const foundPropertyPaths = jsonPath.paths(content, `$..${searchValue}`);
 
-      const foundPropertyPaths = jsonPath
-        .paths(content, `$..${searchValue}`)
-        .map(transformPath);
-
-      console.log("foundPaths", foundValuePaths);
-      console.log("foundPropertyPaths", foundPropertyPaths);
-      const foundPaths = foundValuePaths.concat(foundPropertyPaths);
+      const rawFoundPaths = foundStringValuePaths.concat(
+        foundOtherValuePaths,
+        foundPropertyPaths
+      );
+      const foundPaths = rawFoundPaths.map(transformPath);
 
       setFoundPaths(foundPaths);
       setElementsFoundCount(foundPaths.length);
+
       refEditor.current.expand((path) => path.length < 1);
 
       if (foundPaths.length) {
-        foundPaths.forEach((foundPath) =>
-          refEditor.current.scrollTo(foundPath)
-        );
+        foundPaths.forEach((foundPath, index) => {
+          const rawPath = rawFoundPaths[index];
+
+          const childPaths = jsonPath
+            .paths(content, jsonPath.stringify(rawPath) + ".*")
+            .map(transformPath);
+
+          if (childPaths.length) {
+            childPaths.forEach((childPath) => {
+              refEditor.current.scrollTo(childPath);
+            });
+          } else {
+            refEditor.current.scrollTo(foundPath);
+          }
+        });
+
         refEditor.current.scrollTo(foundPaths[0]);
       }
 
@@ -123,7 +136,7 @@ export function ReactJSONEditor({
         onClassName: createOnClassName(searchValue, foundPaths),
       });
     } catch (e) {
-      console.error(e);
+      console.error("An error ocurred while searching in the json", e);
     }
 
     function transformPath(path: jsonPath.PathComponent[]): string[] {
@@ -133,9 +146,7 @@ export function ReactJSONEditor({
 
   return (
     <>
-      {elementsFoundCount > 0 && (
-        <span>Found {elementsFoundCount} elements.</span>
-      )}
+      {elementsFoundCount > 0 && <span>{elementsFoundCount} result(s)</span>}
       <div
         style={{ display: "flex", flex: 1 }}
         className={isDarkModeEnabled ? "jse-theme-dark" : ""}
