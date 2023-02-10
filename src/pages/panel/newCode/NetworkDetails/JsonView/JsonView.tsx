@@ -1,6 +1,8 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { RequestContext } from "../../Panel";
 import { ReactJSONEditor } from "./ReactJSONEditor";
+
+const HISTORY_MAX_LENGTH = 12;
 
 export function JsonView() {
   const { selectedRequest, isDarkModeEnabled } = useContext(RequestContext);
@@ -15,12 +17,32 @@ export function JsonView() {
 
   function addSearchTerm(searchTerm: string) {
     setSearchedValue(searchTerm);
-    setSearchHistory((history) =>
+    setSearchHistory((oldHistory) =>
       [searchTerm].concat(
-        history.filter((oldSearchTerm) => oldSearchTerm !== searchTerm)
+        oldHistory.filter(
+          (oldSearchTerm, index) =>
+            oldSearchTerm !== searchTerm && index <= HISTORY_MAX_LENGTH
+        )
       )
     );
   }
+
+  useEffect(() => {
+    if (chrome.storage) {
+      chrome.storage.local.get(["searchHistory"], (storage) => {
+        const storedHistory = storage["searchHistory"];
+        if (storedHistory) {
+          setSearchHistory(storedHistory);
+        }
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (chrome.storage) {
+      chrome.storage.local.set({ searchHistory });
+    }
+  }, [searchHistory]);
 
   return (
     <section>
@@ -53,21 +75,23 @@ export function JsonView() {
         {searchHistory.length > 1 && (
           <span className="ms-1 me-1">History:</span>
         )}
-        {searchHistory.slice(1).map((searchTerm, index) => (
-          <span key={searchTerm} className="d-flex align-items-center">
-            {index > 0 && <span className="ms-1">&</span>}
-            <span
-              className="btn badge badge-sm text-bg-secondary ms-1"
-              onClick={(e) => {
-                addSearchTerm(searchTerm);
-                e.stopPropagation();
-              }}
-              title="Click to search"
-            >
-              {searchTerm}
+        {searchHistory
+          .filter((_, index) => (searchedValue !== "" ? index > 0 : true))
+          .map((searchTerm, index) => (
+            <span key={searchTerm} className="d-flex align-items-center">
+              {index > 0 && <span className="ms-1">&</span>}
+              <span
+                className="btn badge badge-sm text-bg-secondary ms-1"
+                onClick={(e) => {
+                  addSearchTerm(searchTerm);
+                  e.stopPropagation();
+                }}
+                title="Click to search"
+              >
+                {searchTerm}
+              </span>
             </span>
-          </span>
-        ))}
+          ))}
       </div>
 
       <section className="mb-1 ms-1">
