@@ -69,7 +69,11 @@ export function NetworkRequestsToolbar({
       </div>
 
       <div className="d-flex flex-wrap align-items-center my-1 ms-1">
-        <span onClick={() => clearFilters()} className="me-1 icon-btn">
+        <span
+          onClick={() => clearFilters()}
+          className="me-1 icon-btn"
+          title="Clear"
+        >
           <ThemeIconProvider>
             <FiSlash />
           </ThemeIconProvider>
