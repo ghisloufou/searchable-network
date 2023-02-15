@@ -30,6 +30,12 @@ export function JsonView() {
     );
   }
 
+  function removeSearchTerm(searchTerm: string) {
+    setSearchHistory((oldHistory) =>
+      oldHistory.filter((oldSearchTerm) => oldSearchTerm !== searchTerm)
+    );
+  }
+
   useEffect(() => {
     if (chrome.storage) {
       chrome.storage.local.get(["searchHistory"], (storage) => {
@@ -74,7 +80,7 @@ export function JsonView() {
         {searchedValue !== "" && (
           <span className="ms-1 me-1">
             Current:{" "}
-            <span className="btn badge badge-sm text-bg-primary ms-1">
+            <span className="badge badge-sm text-bg-primary ms-1">
               {searchedValue}
             </span>
           </span>
@@ -88,11 +94,17 @@ export function JsonView() {
             <span key={searchTerm} className="d-flex align-items-center">
               <span
                 className="btn badge badge-sm text-bg-secondary ms-1 hover-bg-primary"
-                onClick={(e) => {
+                onClick={(event) => {
                   addSearchTerm(searchTerm);
-                  e.stopPropagation();
+                  event.stopPropagation();
                 }}
-                title="Click to search"
+                onMouseDown={(event) => {
+                  if (event.button === 1) {
+                    removeSearchTerm(searchTerm);
+                    event.stopPropagation();
+                  }
+                }}
+                title="Click to search, Mousewheel click to delete"
               >
                 {searchTerm}
               </span>
