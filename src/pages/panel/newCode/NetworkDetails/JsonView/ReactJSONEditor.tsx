@@ -1,3 +1,4 @@
+import * as jsonPath from "jsonpath";
 import { useEffect, useRef, useState } from "react";
 import {
   Content,
@@ -5,7 +6,6 @@ import {
   JSONEditorPropsOptional,
   JSONPath,
 } from "vanilla-jsoneditor";
-import * as jsonPath from "jsonpath";
 import "./ReactJSONEditor.scss";
 
 type ReactJSONEditorProps = {
@@ -102,13 +102,28 @@ export function ReactJSONEditor({
         foundPaths.forEach((foundPath, index) => {
           const rawPath = rawFoundPaths[index];
 
-          const childPaths = jsonPath
-            .paths(content, jsonPath.stringify(rawPath) + ".*")
-            .map(transformPath);
+          const rawChildPaths = jsonPath.paths(
+            content,
+            jsonPath.stringify(rawPath) + ".*"
+          );
+          const childPaths = rawChildPaths.map(transformPath);
 
           if (childPaths.length) {
-            childPaths.forEach((childPath) => {
-              refEditor.current.scrollTo(childPath);
+            childPaths.forEach((childPath, childIndex) => {
+              const rawChildPath = rawChildPaths[childIndex];
+              if (typeof rawChildPath[rawChildPath.length - 1] === "number") {
+                const grandChildPaths = jsonPath
+                  .paths(content, jsonPath.stringify(rawChildPath) + ".*")
+                  .map(transformPath);
+
+                if (grandChildPaths.length) {
+                  grandChildPaths.forEach((grandChildPath) => {
+                    refEditor.current.scrollTo(grandChildPath);
+                  });
+                }
+              } else {
+                refEditor.current.scrollTo(childPath);
+              }
             });
           } else {
             refEditor.current.scrollTo(foundPath);
@@ -119,7 +134,6 @@ export function ReactJSONEditor({
       }
 
       refEditor.current.updateProps({
-        ...defaultJsonEditorProps,
         onClassName: createOnClassName(searchValue, foundPaths),
       });
     } catch (e) {
