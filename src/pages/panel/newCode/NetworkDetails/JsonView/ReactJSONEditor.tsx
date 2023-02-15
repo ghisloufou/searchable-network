@@ -38,6 +38,9 @@ export function ReactJSONEditor({
       target: refContainer.current,
       props: {
         ...defaultJsonEditorProps,
+        onChange: () => {
+          hightLightSearchedValue();
+        },
         onClassName: createOnClassName(searchValue, foundPaths),
       },
     });
@@ -65,7 +68,7 @@ export function ReactJSONEditor({
 
   useEffect(() => {
     hightLightSearchedValue();
-  }, [searchValue, content]);
+  }, [searchValue]);
 
   function hightLightSearchedValue() {
     if (searchValue === "") {
