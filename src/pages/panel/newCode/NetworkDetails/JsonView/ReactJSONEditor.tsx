@@ -12,7 +12,7 @@ type ReactJSONEditorProps = {
   content: Content;
   isDarkModeEnabled: boolean;
   searchValue: string;
-  expandAll: boolean;
+  expandAll: boolean | null;
 };
 
 const defaultJsonEditorProps: JSONEditorPropsOptional = {
@@ -63,8 +63,8 @@ export function ReactJSONEditor({
   }, [content]);
 
   useEffect(() => {
-    if (refEditor.current) {
-      refEditor.current.expand((path) => (expandAll ? true : path.length < 2));
+    if (refEditor.current && expandAll !== null) {
+      refEditor.current.expand((path) => (expandAll ? true : path.length < 1));
     }
   }, [expandAll]);
 
@@ -73,21 +73,19 @@ export function ReactJSONEditor({
   }, [searchValue]);
 
   function highlightSearchedValue() {
-    if (searchValue === "") {
-      return;
-    }
     try {
-      const foundStringValuePaths = jsonPath.paths(
-        content,
-        `$..[?(/^${searchValue}$/i.test(@))]`
-      );
+      const foundStringValuePaths =
+        searchValue !== ""
+          ? jsonPath.paths(content, `$..[?(/^${searchValue}$/i.test(@))]`)
+          : [];
 
-      const foundOtherValuePaths = jsonPath.paths(
-        content,
-        `$..[?(@ === ${searchValue})]`
-      );
+      const foundOtherValuePaths =
+        searchValue !== ""
+          ? jsonPath.paths(content, `$..[?(@ === ${searchValue})]`)
+          : [];
 
-      const foundPropertyPaths = jsonPath.paths(content, `$..${searchValue}`);
+      const foundPropertyPaths =
+        searchValue !== "" ? jsonPath.paths(content, `$..${searchValue}`) : [];
 
       const rawFoundPaths = foundStringValuePaths.concat(
         foundOtherValuePaths,
@@ -157,6 +155,9 @@ export function ReactJSONEditor({
 
 function createOnClassName(searchedValue: string, foundPaths: JSONPath[]) {
   return (path: JSONPath, value: unknown) => {
+    if (searchedValue === "") {
+      return;
+    }
     if (String(value) === searchedValue) {
       return "green-background";
     }

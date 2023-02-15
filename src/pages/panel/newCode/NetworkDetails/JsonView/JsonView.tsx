@@ -16,7 +16,7 @@ export function JsonView() {
 
   const [searchedValue, setSearchedValue] = useState<string>("");
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
-  const [expandAll, setExpandAll] = useState<boolean>(false);
+  const [expandAll, setExpandAll] = useState<boolean | null>(null);
 
   function addSearchTerm(searchTerm: string) {
     setSearchedValue(searchTerm);
@@ -36,6 +36,10 @@ export function JsonView() {
     );
   }
 
+  function clearSearchTerm() {
+    addSearchTerm("");
+  }
+
   useEffect(() => {
     if (chrome.storage) {
       chrome.storage.local.get(["searchHistory"], (storage) => {
@@ -52,6 +56,10 @@ export function JsonView() {
       chrome.storage.local.set({ searchHistory });
     }
   }, [searchHistory]);
+
+  useEffect(() => {
+    setExpandAll(null);
+  }, [isResponseDisplayed, searchedValue]);
 
   return (
     <section>
@@ -80,7 +88,11 @@ export function JsonView() {
         {searchedValue !== "" && (
           <span className="ms-1 me-1">
             Current:{" "}
-            <span className="badge badge-sm text-bg-primary ms-1">
+            <span
+              className="btn badge badge-sm text-bg-primary ms-1 hover-bg-red"
+              title="Click to clear"
+              onClick={() => clearSearchTerm()}
+            >
               {searchedValue}
             </span>
           </span>
