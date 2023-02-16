@@ -5,6 +5,8 @@ import {
   JSONEditor,
   JSONEditorPropsOptional,
   JSONPath,
+  OnRenderValue,
+  renderValue,
 } from "vanilla-jsoneditor";
 import "./ReactJSONEditor.scss";
 
@@ -13,6 +15,7 @@ type ReactJSONEditorProps = {
   isDarkModeEnabled: boolean;
   searchValue: string;
   expandAll: boolean | null;
+  setSelectedElement: (element: string) => void;
 };
 
 const defaultJsonEditorProps: JSONEditorPropsOptional = {
@@ -26,11 +29,28 @@ export function ReactJSONEditor({
   isDarkModeEnabled,
   searchValue,
   expandAll,
+  setSelectedElement,
 }: ReactJSONEditorProps) {
   const refContainer = useRef(null);
   const refEditor = useRef<JSONEditor>(null);
   const [foundPaths, setFoundPaths] = useState<JSONPath[]>([]);
   const [elementsFoundCount, setElementsFoundCount] = useState<number>(0);
+
+  const onRenderValue: OnRenderValue = (props) => {
+    if (
+      props.isSelected &&
+      (typeof props.value === "string" ||
+        typeof props.value === "number" ||
+        typeof props.value === "boolean")
+    ) {
+      const selectedElement =
+        props.selection.type === "value"
+          ? String(props.value)
+          : props.path[props.path.length - 1];
+      setSelectedElement(selectedElement);
+    }
+    return renderValue(props);
+  };
 
   useEffect(() => {
     // create editor
@@ -39,6 +59,7 @@ export function ReactJSONEditor({
       props: {
         ...defaultJsonEditorProps,
         onClassName: createOnClassName(searchValue, foundPaths),
+        onRenderValue,
       },
     });
 
@@ -58,6 +79,7 @@ export function ReactJSONEditor({
         onChange: () => {
           highlightSearchedValue();
         },
+        onRenderValue,
       });
     }
   }, [content]);
@@ -135,6 +157,7 @@ export function ReactJSONEditor({
 
       refEditor.current.updateProps({
         onClassName: createOnClassName(searchValue, foundPaths),
+        onRenderValue,
       });
     } catch (e) {
       console.error("An error ocurred while searching in the json", e);

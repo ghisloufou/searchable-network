@@ -1,5 +1,4 @@
 import { createContext, useEffect, useState } from "react";
-import { FiMoon, FiSun } from "react-icons/fi";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { NetworkDetails } from "./NetworkDetails/NetworkDetails";
 import { NetworkRequests } from "./NetworkRequests/NetworkRequests";

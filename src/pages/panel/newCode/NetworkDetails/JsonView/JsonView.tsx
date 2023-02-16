@@ -1,6 +1,6 @@
 import { ThemeIconProvider } from "@src/pages/panel/utils/ThemeIconProvider";
 import { useContext, useEffect, useRef, useState } from "react";
-import { FiSearch } from "react-icons/fi";
+import { FiPlus, FiSearch } from "react-icons/fi";
 import { MdOutlineCompress, MdOutlineExpand } from "react-icons/md";
 import { RequestContext } from "../../Panel";
 import { ReactJSONEditor } from "./ReactJSONEditor";
@@ -17,6 +17,7 @@ export function JsonView() {
   const [searchedValue, setSearchedValue] = useState<string>("");
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [expandAll, setExpandAll] = useState<boolean | null>(null);
+  const [selectedElement, setSelectedElement] = useState<string>("");
 
   function addSearchTerm(searchTerm: string) {
     setSearchedValue(searchTerm);
@@ -89,7 +90,7 @@ export function JsonView() {
           <span className="ms-1 me-1">
             Current:{" "}
             <span
-              className="btn badge badge-sm text-bg-primary ms-1 hover-bg-red"
+              className="btn badge badge-sm text-bg-primary ms-1 hover-bg-red fw-normal"
               title="Click to clear"
               onClick={() => clearSearchTerm()}
             >
@@ -105,7 +106,7 @@ export function JsonView() {
           .map((searchTerm) => (
             <span key={searchTerm} className="d-flex align-items-center">
               <span
-                className="btn badge badge-sm text-bg-secondary ms-1 hover-bg-primary"
+                className="btn badge badge-sm text-bg-secondary ms-1 hover-bg-primary fw-normal"
                 onClick={(event) => {
                   addSearchTerm(searchTerm);
                   event.stopPropagation();
@@ -165,18 +166,47 @@ export function JsonView() {
 
         <button
           onClick={() => setExpandAll(false)}
-          className="btn btn-secondary btn-sm me-1"
+          className="btn btn-secondary btn-sm me-1 icon-btn"
           title="Collapse all"
         >
           <MdOutlineCompress />
         </button>
         <button
           onClick={() => setExpandAll(true)}
-          className="btn btn-secondary btn-sm me-1"
+          className="btn btn-secondary btn-sm me-1 icon-btn"
           title="Expand all"
         >
           <MdOutlineExpand />
         </button>
+        {selectedElement !== "" && (
+          <span>
+            Selected:
+            <div
+              className="input-group ms-2"
+              style={{ display: "inline-flex", maxWidth: "250px" }}
+            >
+              <input
+                type="text"
+                readOnly
+                className="form-control form-control-sm"
+                placeholder={selectedElement}
+                aria-label={selectedElement}
+                aria-describedby="basic-addon2"
+                style={{ textOverflow: "ellipsis" }}
+              />
+              <button
+                className="input-group-text btn btn btn-sm btn-secondary icon-btn"
+                id="basic-addon2"
+                onClick={() => addSearchTerm(selectedElement)}
+                title="Click to search for the selected element"
+              >
+                <ThemeIconProvider>
+                  <FiPlus />
+                </ThemeIconProvider>
+              </button>
+            </div>
+          </span>
+        )}
       </section>
 
       <ReactJSONEditor
@@ -190,6 +220,7 @@ export function JsonView() {
         isDarkModeEnabled={isDarkModeEnabled}
         searchValue={searchedValue}
         expandAll={expandAll}
+        setSelectedElement={setSelectedElement}
       />
     </section>
   );

@@ -55,7 +55,7 @@ export function NetworkRequestsToolbar({
           <span key={searchTerm} className="d-flex align-items-center">
             {index > 0 && <span className="ms-1">&</span>}
             <span
-              className="btn badge badge-sm text-bg-secondary ms-1 hover-bg-red"
+              className="btn badge badge-sm text-bg-secondary ms-1 hover-bg-red fw-normal"
               onClick={(e) => {
                 removeFilter(index);
                 e.stopPropagation();
