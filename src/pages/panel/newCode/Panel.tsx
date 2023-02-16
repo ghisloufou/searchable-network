@@ -31,8 +31,8 @@ export function Panel() {
     useState<NetworkRequestEnhanced | null>(null);
   const [isDarkModeEnabled, setIsDarkModeEnabled] = useState(true);
 
-  const darkThemeEventListener = (event) => {
-    setIsDarkModeEnabled(event.matches);
+  const darkThemeEventListener = (event: MediaQueryListEvent) => {
+    // setIsDarkModeEnabled(event.matches); // DISABLED while light mode isn't implemented
   };
 
   useEffect(() => {
@@ -45,14 +45,15 @@ export function Panel() {
 
   return (
     <div>
-      <button
+      {/* DISABLED while light mode isn't implemented */}
+      {/* <button
         className="btn btn-sm"
         onClick={() => setIsDarkModeEnabled((value) => !value)}
         style={{ position: "absolute", top: "0", right: "0" }}
         title={`Switch to ${isDarkModeEnabled ? "light" : "dark"} mode`}
       >
         {isDarkModeEnabled ? <FiSun /> : <FiMoon />}
-      </button>
+      </button> */}
       <RequestContext.Provider value={{ selectedRequest, isDarkModeEnabled }}>
         <ErrorBoundary selectedRequest={selectedRequest}>
           <NetworkRequests
