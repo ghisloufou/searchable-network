@@ -91,8 +91,16 @@ export function JsonView() {
             Current:{" "}
             <span
               className="btn badge badge-sm text-bg-primary ms-1 hover-bg-red fw-normal"
-              title="Click to clear"
+              title="Click to clear, Mousewheel click to delete"
               onClick={() => clearSearchTerm()}
+              onMouseDown={(event) => {
+                // On mouse middle click
+                if (event.button === 1) {
+                  removeSearchTerm(searchedValue);
+                  clearSearchTerm();
+                  event.stopPropagation();
+                }
+              }}
             >
               {searchedValue}
             </span>
@@ -112,6 +120,7 @@ export function JsonView() {
                   event.stopPropagation();
                 }}
                 onMouseDown={(event) => {
+                  // On mouse middle click
                   if (event.button === 1) {
                     removeSearchTerm(searchTerm);
                     event.stopPropagation();
