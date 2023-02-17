@@ -189,7 +189,7 @@ export function JsonView() {
                 type="text"
                 readOnly
                 className="form-control form-control-sm"
-                placeholder={selectedElement}
+                value={selectedElement}
                 aria-label={selectedElement}
                 aria-describedby="basic-addon2"
                 style={{ textOverflow: "ellipsis" }}
