@@ -176,10 +176,12 @@ export function useGetNetworkData() {
   function updateResponseContentInRequests(
     requestToUpdate: NetworkRequestEnhanced
   ) {
-    setRequests((requests) => {
-      const index = requests.findIndex((rq) => rq.id === requestToUpdate.id);
-      requests[index] = requestToUpdate;
-      return requests;
+    setRequests((oldRequests) => {
+      const index = oldRequests.findIndex(
+        (oldRequest) => oldRequest.id === requestToUpdate.id
+      );
+      oldRequests[index] = requestToUpdate;
+      return oldRequests;
     });
   }
 

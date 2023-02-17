@@ -23,6 +23,7 @@ export const RequestContext = createContext<{
 }>({
   isDarkModeEnabled: false,
 });
+
 const darkThemeMedia = window.matchMedia("(prefers-color-scheme: dark)");
 
 export function Panel() {
@@ -56,7 +57,7 @@ export function Panel() {
       <RequestContext.Provider value={{ selectedRequest, isDarkModeEnabled }}>
         <ErrorBoundary selectedRequest={selectedRequest}>
           <NetworkRequests
-            onRequestClick={(request) => setSelectedRequest(request)}
+            onRequestChange={(request) => setSelectedRequest(request)}
           />
           <NetworkDetails />
         </ErrorBoundary>

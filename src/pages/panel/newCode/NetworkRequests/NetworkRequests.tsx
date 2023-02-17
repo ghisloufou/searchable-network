@@ -6,10 +6,10 @@ import { NetworkRequestEnhanced, RequestContext } from "../Panel";
 import { useGetNetworkData } from "./useGetNetworkData";
 
 type NetworkRequestsProps = {
-  onRequestClick: (request: NetworkRequestEnhanced) => void;
+  onRequestChange: (request: NetworkRequestEnhanced) => void;
 };
 
-export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
+export function NetworkRequests({ onRequestChange }: NetworkRequestsProps) {
   const { selectedRequest, isDarkModeEnabled } = useContext(RequestContext);
   const {
     filteredRequests,
@@ -29,7 +29,7 @@ export function NetworkRequests({ onRequestClick }: NetworkRequestsProps) {
   const handleOnRequestClick = async (request: NetworkRequestEnhanced) => {
     const requestWithContent = await getNetworkRequestWithContent(request);
     updateResponseContentInRequests(requestWithContent);
-    onRequestClick(requestWithContent);
+    onRequestChange(requestWithContent);
   };
 
   return (
