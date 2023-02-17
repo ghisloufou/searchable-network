@@ -1,6 +1,6 @@
 try {
   chrome.devtools.panels.create(
-    "Second better network panel",
+    "Better Network",
     "icon-34.png",
     "src/pages/panel/index.html",
     (panel) => {
@@ -9,5 +9,5 @@ try {
     }
   );
 } catch (e) {
-  console.error("[Second better network panel] Dev tools loading fail", e);
+  console.error("[Better Network] Dev tools loading fail", e);
 }
