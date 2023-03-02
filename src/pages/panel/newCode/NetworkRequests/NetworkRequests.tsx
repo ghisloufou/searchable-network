@@ -4,6 +4,7 @@ import { getNetworkRequestWithContent } from "./getNetworkRequestWithContent";
 import { NetworkRequestsToolbar } from "./NetworkRequestsToolbar";
 import { NetworkRequestEnhanced, RequestContext } from "../Panel";
 import { useGetNetworkData } from "./useGetNetworkData";
+import { FixedSizeList } from "react-window";
 
 type NetworkRequestsProps = {
   onRequestChange: (request: NetworkRequestEnhanced) => void;
@@ -30,6 +31,30 @@ export function NetworkRequests({ onRequestChange }: NetworkRequestsProps) {
     const requestWithContent = await getNetworkRequestWithContent(request);
     updateResponseContentInRequests(requestWithContent);
     onRequestChange(requestWithContent);
+  };
+
+  const Row = ({ index }) => {
+    const request = filteredRequests[index];
+    const isError = request.response.status >= 400;
+    return (
+      <tr
+        key={request.id}
+        onClick={() => handleOnRequestClick(request)}
+        className={`clickable ${
+          selectedRequest?.id === request.id ? "selected" : ""
+        } ${isError ? "request-error" : ""}`}
+      >
+        <ErrorrableTd isError={isError} value={index} />
+        <ErrorrableTd
+          isError={isError}
+          title={request.request.url}
+          value={request.request.truncatedUrl}
+        />
+        <ErrorrableTd isError={isError} value={request.response.status} />
+        <ErrorrableTd isError={isError} value={request.request.method} />
+        <ErrorrableTd isError={isError} value={request.response.type} />
+      </tr>
+    );
   };
 
   return (
@@ -69,6 +94,14 @@ export function NetworkRequests({ onRequestChange }: NetworkRequestsProps) {
               <th scope="col">Type</th>
             </tr>
           </thead>
+          {/* <FixedSizeList
+            className="List"
+            height={400}
+            itemCount={filteredRequests.length}
+            itemSize={22.5}
+            width={"100%"}
+            children={Row}
+          /> */}
           <tbody>
             {filteredRequests.map((request, index) => {
               const isError = request.response.status >= 400;
