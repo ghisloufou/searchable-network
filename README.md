@@ -1,3 +1,5 @@
+A chrome extension primarily designed to help me and my team search in deep network payloads and responses
+
 ### Procedures <a name="procedures"></a>
 
 1. Run `yarn` or `npm i` (check your node version >= 16)

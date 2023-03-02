@@ -7,10 +7,10 @@ const manifest: chrome.runtime.ManifestV3 = {
   description: packageJson.description,
   // options_page: "src/pages/options/index.html",
   // background: { service_worker: "src/pages/background/index.js" },
-  action: {
-    default_popup: "src/pages/popup/index.html",
-    default_icon: "icon-34.png",
-  },
+  // action: {
+  //   default_popup: "src/pages/popup/index.html",
+  //   default_icon: "icon-34.png",
+  // },
   // chrome_url_overrides: {
   //   newtab: "src/pages/newtab/index.html",
   // },

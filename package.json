@@ -1,11 +1,11 @@
 {
-  "name": "better-network",
+  "name": "searchable-network",
   "version": "1.0.0",
-  "description": "A chrome extension to better search in the network payloads and responses",
+  "description": "A chrome extension primarily designed to help me and my team search in deep network payloads and responses",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ghisloufou/better-better-network-panel.git"
+    "url": "https://github.com/ghisloufou/searchable-network.git"
   },
   "scripts": {
     "build": "tsc --noEmit && vite build",
