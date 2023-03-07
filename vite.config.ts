@@ -7,7 +7,6 @@ import addHmr from "./utils/plugins/add-hmr";
 import manifest from "./manifest";
 
 const root = resolve(__dirname, "src");
-const root2 = resolve(__dirname, "dist");
 const pagesDir = resolve(root, "pages");
 const assetsDir = resolve(root, "assets");
 const nodeModulesDir = resolve(__dirname, "node_modules");
@@ -23,7 +22,6 @@ export default defineConfig({
   resolve: {
     alias: {
       "@src": root,
-      "@ddd": root2,
       "@assets": assetsDir,
       "@pages": pagesDir,
       "@node_modules": nodeModulesDir,
@@ -43,12 +41,6 @@ export default defineConfig({
       input: {
         devtools: resolve(pagesDir, "devtools", "index.html"),
         panel: resolve(pagesDir, "panel", "index.html"),
-        content: resolve(pagesDir, "content", "index.ts"),
-        background: resolve(pagesDir, "background", "index.ts"),
-        contentStyle: resolve(pagesDir, "content", "style.scss"),
-        popup: resolve(pagesDir, "popup", "index.html"),
-        newtab: resolve(pagesDir, "newtab", "index.html"),
-        options: resolve(pagesDir, "options", "index.html"),
       },
       output: {
         entryFileNames: "src/pages/[name]/index.js",
