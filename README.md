@@ -2,22 +2,20 @@ A chrome extension primarily designed to help me and my team search in deep netw
 
 ### Project startup and extension setup <a name="procedures"></a>
 
-1. Run `yarn` or `npm i` (check your node version >= 16)
-2. Run `yarn dev` or `npm run dev`
+1. Run `pnpm i` (check your node version >= 16)
+2. Run `pnpm dev`
 3. Load Extension on Chrome
    1. Open - Chrome browser
    2. Access - chrome://extensions
    3. Check - Developer mode
    4. Find - Load unpacked extension
    5. Select - `dist` folder in this project (after dev or build)
-4. If you want to build in production, run `yarn build` or `npm run build`.
+4. If you want to build in production, run `pnpm build`
 
 ### Start the dev environment:
 
 ```
-  yarn start
-
-  pnpm startp
+  pnpm start
 ```
 
 ### View changes in the extension after a dev rebuild:
