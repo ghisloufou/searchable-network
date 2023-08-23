@@ -16,7 +16,7 @@ import { NetworkRequestEnhanced } from "../Panel";
 // }
 
 export async function getNetworkRequestWithContent(
-  request: NetworkRequestEnhanced
+  request: NetworkRequestEnhanced,
 ): Promise<NetworkRequestEnhanced> {
   if (request.response.responseContent === undefined) {
     const responseContent = await getResponseContent(request);
@@ -40,4 +40,4 @@ const getResponseContent = (request: NetworkRequestEnhanced) => {
       resolve(responseContent);
     });
   });
-}
+};

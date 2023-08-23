@@ -1,5 +1,7 @@
 export function ErrorrableTd({
-  value, title, isError,
+  value,
+  title,
+  isError,
 }: {
   value: string | number;
   title?: string;

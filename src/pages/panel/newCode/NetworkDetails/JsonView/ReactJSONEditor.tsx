@@ -111,7 +111,7 @@ export function ReactJSONEditor({
 
       const rawFoundPaths = foundStringValuePaths.concat(
         foundOtherValuePaths,
-        foundPropertyPaths
+        foundPropertyPaths,
       );
       const foundPaths = rawFoundPaths.map(transformPath);
 
@@ -126,7 +126,7 @@ export function ReactJSONEditor({
 
           const rawChildPaths = jsonPath.paths(
             content,
-            jsonPath.stringify(rawPath) + ".*"
+            jsonPath.stringify(rawPath) + ".*",
           );
           const childPaths = rawChildPaths.map(transformPath);
 
@@ -186,7 +186,7 @@ function createOnClassName(searchedValue: string, foundPaths: JSONPath[]) {
     }
     if (
       foundPaths.some(
-        (foundPath) => JSON.stringify(path) === JSON.stringify(foundPath)
+        (foundPath) => JSON.stringify(path) === JSON.stringify(foundPath),
       )
     ) {
       return "red-background";

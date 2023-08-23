@@ -9,7 +9,7 @@ const DUMMY_CODE = `export default function(){};`;
 function getInjectionCode(fileName: string): string {
   return readFileSync(
     path.resolve(__dirname, "..", "reload", "injections", fileName),
-    { encoding: "utf8" }
+    { encoding: "utf8" },
   );
 }
 

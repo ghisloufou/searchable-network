@@ -94,8 +94,8 @@ export function JsonView() {
               title="Click to clear, Mousewheel click to delete"
               onClick={() => clearSearchTerm()}
               onMouseDown={(event) => {
-                // On mouse middle click
-                if (event.button === 1) {
+                const isMiddleMouseClicked = event.button === 1;
+                if (isMiddleMouseClicked) {
                   removeSearchTerm(searchedValue);
                   clearSearchTerm();
                   event.stopPropagation();

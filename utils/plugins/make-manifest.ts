@@ -9,7 +9,7 @@ const { resolve } = path;
 const outDir = resolve(__dirname, "..", "..", "public");
 
 export default function makeManifest(
-  manifest: chrome.runtime.ManifestV3
+  manifest: chrome.runtime.ManifestV3,
 ): PluginOption {
   return {
     name: "make-manifest",
@@ -22,7 +22,7 @@ export default function makeManifest(
 
       fs.writeFileSync(
         manifestPath,
-        ManifestParser.convertManifestToString(manifest)
+        ManifestParser.convertManifestToString(manifest),
       );
 
       colorLog(`Manifest file copy complete: ${manifestPath}`, "success");
