@@ -94,8 +94,8 @@ export function JsonView() {
               title="Click to clear, Mousewheel click to delete"
               onClick={() => clearSearchTerm()}
               onMouseDown={(event) => {
-                const isMiddleMouseClicked = event.button === 1;
-                if (isMiddleMouseClicked) {
+                const isMiddleMouseButton = event.button === 1;
+                if (isMiddleMouseButton) {
                   removeSearchTerm(searchedValue);
                   clearSearchTerm();
                   event.stopPropagation();
@@ -120,8 +120,8 @@ export function JsonView() {
                   event.stopPropagation();
                 }}
                 onMouseDown={(event) => {
-                  // On mouse middle click
-                  if (event.button === 1) {
+                  const isMiddleMouseButton = event.button === 1;
+                  if (isMiddleMouseButton) {
                     removeSearchTerm(searchTerm);
                     event.stopPropagation();
                   }

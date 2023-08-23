@@ -22,14 +22,13 @@
     "@popperjs/core": "^2.11.8",
     "@types/jsonpath": "^0.2.0",
     "bootstrap": "^5.3.1",
-    "jsoneditor": "^9.10.2",
     "jsonpath": "^1.1.1",
     "react": "18.2.0",
     "react-diff-viewer-continued": "^3.2.6",
     "react-dom": "18.2.0",
     "react-highlight-words": "^0.20.0",
     "react-icons": "^4.10.1",
-    "vanilla-jsoneditor": "0.10.4"
+    "vanilla-jsoneditor": "0.18.0"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.2",
@@ -37,7 +36,6 @@
     "@testing-library/user-event": "^14.4.3",
     "@types/chrome": "0.0.243",
     "@types/jest": "29.5.4",
-    "@types/jsoneditor": "^9.9.0",
     "@types/node": "20.5.3",
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.7",

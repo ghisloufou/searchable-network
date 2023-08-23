@@ -4,11 +4,12 @@ import {
   Content,
   JSONEditor,
   JSONEditorPropsOptional,
-  JSONPath,
-  OnRenderValue,
-  renderValue,
+  JSONEditorSelection,
+  SelectionType,
 } from "vanilla-jsoneditor";
 import "./ReactJSONEditor.scss";
+
+type JSONPath = string[];
 
 type ReactJSONEditorProps = {
   content: Content;
@@ -36,20 +37,19 @@ export function ReactJSONEditor({
   const [foundPaths, setFoundPaths] = useState<JSONPath[]>([]);
   const [elementsFoundCount, setElementsFoundCount] = useState<number>(0);
 
-  const onRenderValue: OnRenderValue = (props) => {
-    if (
-      props.isSelected &&
-      (typeof props.value === "string" ||
-        typeof props.value === "number" ||
-        typeof props.value === "boolean")
-    ) {
-      const selectedElement =
-        props.selection.type === "value"
-          ? String(props.value)
-          : props.path[props.path.length - 1];
-      setSelectedElement(selectedElement);
+  const onSelect = (selection: JSONEditorSelection) => {
+    switch (selection.type) {
+      case SelectionType.key:
+        setSelectedElement(selection.path[selection.path.length - 1]);
+        break;
+      case SelectionType.value:
+        try {
+          setSelectedElement(
+            jsonPath.value(content, `$..${selection.path.join(".")}`)
+          );
+        } catch {}
+        break;
     }
-    return renderValue(props);
   };
 
   useEffect(() => {
@@ -59,7 +59,7 @@ export function ReactJSONEditor({
       props: {
         ...defaultJsonEditorProps,
         onClassName: createOnClassName(searchValue, foundPaths),
-        onRenderValue,
+        onSelect,
       },
     });
 
@@ -79,8 +79,8 @@ export function ReactJSONEditor({
         onChange: () => {
           highlightSearchedValue();
         },
-        onRenderValue,
-      });
+        onSelect,
+      } as JSONEditorPropsOptional);
     }
   }, [content]);
 
@@ -103,7 +103,7 @@ export function ReactJSONEditor({
 
       const foundOtherValuePaths =
         searchValue !== ""
-          ? jsonPath.paths(content, `$..[?(@ === ${searchValue})]`)
+          ? jsonPath.paths(content, `$..[?(@ === ${searchValue})]`) // TODO: Make this search case insensitive
           : [];
 
       const foundPropertyPaths =
@@ -111,7 +111,7 @@ export function ReactJSONEditor({
 
       const rawFoundPaths = foundStringValuePaths.concat(
         foundOtherValuePaths,
-        foundPropertyPaths,
+        foundPropertyPaths
       );
       const foundPaths = rawFoundPaths.map(transformPath);
 
@@ -126,7 +126,7 @@ export function ReactJSONEditor({
 
           const rawChildPaths = jsonPath.paths(
             content,
-            jsonPath.stringify(rawPath) + ".*",
+            jsonPath.stringify(rawPath) + ".*"
           );
           const childPaths = rawChildPaths.map(transformPath);
 
@@ -157,8 +157,8 @@ export function ReactJSONEditor({
 
       refEditor.current.updateProps({
         onClassName: createOnClassName(searchValue, foundPaths),
-        onRenderValue,
-      });
+        onSelect,
+      } as JSONEditorPropsOptional);
     } catch (e) {
       console.error("An error ocurred while searching in the json", e);
     }
@@ -186,7 +186,7 @@ function createOnClassName(searchedValue: string, foundPaths: JSONPath[]) {
     }
     if (
       foundPaths.some(
-        (foundPath) => JSON.stringify(path) === JSON.stringify(foundPath),
+        (foundPath) => JSON.stringify(path) === JSON.stringify(foundPath)
       )
     ) {
       return "red-background";
