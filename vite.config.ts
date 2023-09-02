@@ -41,9 +41,13 @@ export default defineConfig({
       input: {
         devtools: resolve(pagesDir, "devtools", "index.html"),
         panel: resolve(pagesDir, "panel", "index.html"),
+        serviceWorker: resolve(root, "serviceWorker.ts"),
       },
       output: {
-        entryFileNames: "src/pages/[name]/index.js",
+        entryFileNames: (chunkInfo) =>
+          chunkInfo.name === "serviceWorker"
+            ? "src/serviceWorker/index.js"
+            : "src/pages/[name]/index.js",
         chunkFileNames: isDev
           ? "assets/js/[name].js"
           : "assets/js/[name].[hash].js",

@@ -11,6 +11,10 @@ const manifest: chrome.runtime.ManifestV3 = {
   },
   devtools_page: "src/pages/devtools/index.html",
   permissions: ["storage"],
+  background: {
+    service_worker: "src/serviceWorker/index.js",
+    type: "module",
+  },
   web_accessible_resources: [
     {
       resources: [

@@ -8,8 +8,11 @@ import {
   SelectionType,
 } from "vanilla-jsoneditor";
 import "./ReactJSONEditor.scss";
-
-type JSONPath = string[];
+import {
+  PathSearchInput,
+  PathSearchResponse,
+  SERVICE_WORKER_PORT_NAME,
+} from "@src/serviceWorker";
 
 type ReactJSONEditorProps = {
   content: Content;
@@ -33,21 +36,29 @@ export function ReactJSONEditor({
   setSelectedElement,
 }: ReactJSONEditorProps) {
   const refContainer = useRef(null);
+  const serviceWorker = useRef<chrome.runtime.Port | null>(null);
   const refEditor = useRef<JSONEditor>(null);
-  const [foundPaths, setFoundPaths] = useState<JSONPath[]>([]);
+  const [foundPaths, setFoundPaths] = useState<jsonPath.PathComponent[][]>([]);
   const [elementsFoundCount, setElementsFoundCount] = useState<number>(0);
+  const [isLoadingSearch, setIsLoadingSearch] = useState(false);
 
   const onSelect = (selection: JSONEditorSelection) => {
     switch (selection.type) {
       case SelectionType.key:
-        setSelectedElement(selection.path[selection.path.length - 1]);
+        setSelectedElement(String(selection.path[selection.path.length - 1]));
         break;
       case SelectionType.value:
         try {
-          setSelectedElement(
-            jsonPath.value(content, `$..${selection.path.join(".")}`)
+          const value = jsonPath.value(
+            content,
+            `$..${selection.path.map((entry) => `['${entry}']`).join("")}`
           );
-        } catch {}
+
+          setSelectedElement(typeof value === "object" ? "" : String(value));
+        } catch (error) {
+          console.warn(error);
+          setSelectedElement("");
+        }
         break;
     }
   };
@@ -62,6 +73,8 @@ export function ReactJSONEditor({
         onSelect,
       },
     });
+    const port = chrome.runtime.connect({ name: SERVICE_WORKER_PORT_NAME });
+    serviceWorker.current = port;
 
     return () => {
       // destroy editor
@@ -69,6 +82,7 @@ export function ReactJSONEditor({
         refEditor.current.destroy();
         refEditor.current = null;
       }
+      serviceWorker.current?.disconnect();
     };
   }, []);
 
@@ -91,93 +105,79 @@ export function ReactJSONEditor({
   }, [expandAll]);
 
   useEffect(() => {
+    setIsLoadingSearch(true);
+    refEditor.current.expand((path) => path.length < 1);
     highlightSearchedValue();
   }, [searchValue]);
 
   function highlightSearchedValue() {
-    try {
-      const foundStringValuePaths =
-        searchValue !== ""
-          ? jsonPath.paths(content, `$..[?(/^${searchValue}$/i.test(@))]`)
-          : [];
+    const searchInput: PathSearchInput = {
+      searchValue,
+      content,
+    };
+    console.log("Sending message:", searchInput);
+    serviceWorker.current.postMessage(searchInput);
 
-      const foundOtherValuePaths =
-        searchValue !== ""
-          ? jsonPath.paths(content, `$..[?(@ === ${searchValue})]`) // TODO: Make this search case insensitive
-          : [];
-
-      const foundPropertyPaths =
-        searchValue !== "" ? jsonPath.paths(content, `$..${searchValue}`) : [];
-
-      const rawFoundPaths = foundStringValuePaths.concat(
-        foundOtherValuePaths,
-        foundPropertyPaths
+    const messageListener = (response: PathSearchResponse) => {
+      console.log(
+        "🚀 ~ file: ReactJSONEditor.tsx:121 ~ highlightSearchedValue ~ response:",
+        response
       );
-      const foundPaths = rawFoundPaths.map(transformPath);
+      if (response) {
+        const { pathsFound, pathsToOpen } = response;
+        setIsLoadingSearch(false);
 
-      setFoundPaths(foundPaths);
-      setElementsFoundCount(foundPaths.length);
+        refEditor.current.updateProps({
+          onClassName: createOnClassName(searchValue, pathsFound),
+          onSelect,
+        } as JSONEditorPropsOptional);
 
-      refEditor.current.expand((path) => path.length < 1);
-
-      if (foundPaths.length) {
-        foundPaths.forEach((foundPath, index) => {
-          const rawPath = rawFoundPaths[index];
-
-          const rawChildPaths = jsonPath.paths(
-            content,
-            jsonPath.stringify(rawPath) + ".*"
-          );
-          const childPaths = rawChildPaths.map(transformPath);
-
-          if (childPaths.length) {
-            childPaths.forEach((childPath, childIndex) => {
-              const rawChildPath = rawChildPaths[childIndex];
-              if (typeof rawChildPath[rawChildPath.length - 1] === "number") {
-                const grandChildPaths = jsonPath
-                  .paths(content, jsonPath.stringify(rawChildPath) + ".*")
-                  .map(transformPath);
-
-                if (grandChildPaths.length) {
-                  grandChildPaths.forEach((grandChildPath) => {
-                    refEditor.current.scrollTo(grandChildPath);
-                  });
-                }
-              } else {
-                refEditor.current.scrollTo(childPath);
-              }
-            });
-          } else {
-            refEditor.current.scrollTo(foundPath);
-          }
+        setFoundPaths(pathsFound);
+        setElementsFoundCount(pathsFound.length);
+        pathsToOpen.forEach((path) => {
+          refEditor.current.scrollTo(path);
         });
-
-        refEditor.current.scrollTo(foundPaths[0]);
+      } else {
+        console.error(
+          "An error has occured while communicating with the service worker"
+        );
       }
+      serviceWorker.current.onMessage.removeListener(messageListener);
+    };
 
-      refEditor.current.updateProps({
-        onClassName: createOnClassName(searchValue, foundPaths),
-        onSelect,
-      } as JSONEditorPropsOptional);
-    } catch (e) {
-      console.error("An error ocurred while searching in the json", e);
-    }
+    serviceWorker.current.onMessage.addListener(messageListener);
   }
 
   return (
     <>
-      {elementsFoundCount > 0 && <span>{elementsFoundCount} result(s)</span>}
+      {elementsFoundCount > 0 && !isLoadingSearch && (
+        <span className="ms-2 mb-1">
+          {elementsFoundCount} result{elementsFoundCount > 1 && "(s)"}
+        </span>
+      )}
+      {isLoadingSearch && (
+        <div className="d-flex align-items-center gap-1 ms-2">
+          <div className="spinner-border spinner-border-sm" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          Loading search results...
+        </div>
+      )}
       <div
-        style={{ display: "flex", flex: 1 }}
-        className={isDarkModeEnabled ? "jse-theme-dark" : ""}
+        className={`${isDarkModeEnabled ? "jse-theme-dark" : ""} ${
+          isLoadingSearch ? "loading-json-editor" : ""
+        } d-flex flex-fill`}
         ref={refContainer}
       ></div>
     </>
   );
 }
 
-function createOnClassName(searchedValue: string, foundPaths: JSONPath[]) {
-  return (path: JSONPath, value: unknown) => {
+function createOnClassName(
+  searchedValue: string,
+  foundPaths: jsonpath.PathComponent[][]
+) {
+  return (path: string[], value: unknown) => {
     if (searchedValue === "") {
       return;
     }
@@ -192,8 +192,4 @@ function createOnClassName(searchedValue: string, foundPaths: JSONPath[]) {
       return "red-background";
     }
   };
-}
-
-function transformPath(path: jsonPath.PathComponent[]): string[] {
-  return path.slice(2).map((element) => String(element));
 }

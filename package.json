@@ -1,6 +1,6 @@
 {
   "name": "searchable-network",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A chrome extension primarily designed to help me and my team search in deep network payloads and responses",
   "license": "MIT",
   "repository": {

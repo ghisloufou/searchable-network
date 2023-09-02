@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NetworkRequest, NetworkRequestEnhanced } from "../Panel";
 import { ulid } from "ulid";
 
@@ -31,7 +31,7 @@ export function useGetNetworkData() {
     }
 
     chrome.devtools.network.onRequestFinished.addListener(
-      onRequestFinishedListener,
+      onRequestFinishedListener
     );
 
     chrome.devtools.network.onNavigated.addListener(onNavigatedListener);
@@ -40,7 +40,7 @@ export function useGetNetworkData() {
 
     return () => {
       chrome.devtools.network.onRequestFinished.removeListener(
-        onRequestFinishedListener,
+        onRequestFinishedListener
       );
       chrome.devtools.network.onNavigated.removeListener(onNavigatedListener);
       tableRef.current.removeEventListener("scroll", scrollListener);
@@ -77,7 +77,7 @@ export function useGetNetworkData() {
     setFilteredRequests(
       requests.filter((request) => {
         const resourceType = Object.entries(request).find(
-          ([key]) => key === "_resourceType",
+          ([key]) => key === "_resourceType"
         );
 
         const isXhrFiltered =
@@ -99,7 +99,7 @@ export function useGetNetworkData() {
           request.request.method !== "OPTIONS" &&
           isXhrFiltered
         );
-      }),
+      })
     );
   }, [requests, filters, isFilterXhrEnabled]);
 
@@ -120,17 +120,15 @@ export function useGetNetworkData() {
     });
   };
 
-  const onNavigatedListener = (url: string) => {
-    console.log("onNavigatedListener: url", url);
-    // setRequests([]);
-    //  todo?: display a line break in the network logs to show page reloaded
+  const onNavigatedListener = () => {
+    //  TODO?: display a line break in the network logs to show page reloaded
   };
 
   const scrollListener = () => {
     const element = tableRef.current;
     const isScrollNearBottomOfElement =
       Math.abs(
-        element.scrollHeight - element.scrollTop - element.clientHeight,
+        element.scrollHeight - element.scrollTop - element.clientHeight
       ) <= 5.0;
     setAutoScroll(isScrollNearBottomOfElement);
   };
@@ -159,7 +157,7 @@ export function useGetNetworkData() {
           .slice(-200)
           .filter(
             (entry) =>
-              !!entry && !entry.request.url.startsWith("chrome-extension://"),
+              !!entry && !entry.request.url.startsWith("chrome-extension://")
           )
           .map((entry) => {
             const res = getEnhancedRequest(entry as NetworkRequest);
@@ -168,17 +166,17 @@ export function useGetNetworkData() {
             }
             return res;
           })
-          .filter((res) => !!res),
+          .filter((res) => !!res)
       );
     });
   }
 
   function updateResponseContentInRequests(
-    requestToUpdate: NetworkRequestEnhanced,
+    requestToUpdate: NetworkRequestEnhanced
   ) {
     setRequests((oldRequests) => {
       const index = oldRequests.findIndex(
-        (oldRequest) => oldRequest.id === requestToUpdate.id,
+        (oldRequest) => oldRequest.id === requestToUpdate.id
       );
       oldRequests[index] = requestToUpdate;
       return oldRequests;
@@ -202,10 +200,12 @@ export function useGetNetworkData() {
 }
 
 function getEnhancedRequest(request: NetworkRequest): NetworkRequestEnhanced {
-  let requestContent = { "Request content": "not found" };
+  let requestContent = { "Request content": "is empty" };
   try {
     requestContent = JSON.parse(request.request.postData.text);
-  } catch {}
+  } catch {
+    /* empty */
+  }
 
   const newRequest = request as NetworkRequestEnhanced;
   newRequest.request.requestContent = requestContent;

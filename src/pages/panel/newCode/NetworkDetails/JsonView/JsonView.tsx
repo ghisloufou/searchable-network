@@ -1,6 +1,6 @@
 import { ThemeIconProvider } from "@src/pages/panel/utils/ThemeIconProvider";
 import { useContext, useEffect, useRef, useState } from "react";
-import { FiPlus, FiSearch } from "react-icons/fi";
+import { FiSearch } from "react-icons/fi";
 import { MdOutlineCompress, MdOutlineExpand } from "react-icons/md";
 import { RequestContext } from "../../Panel";
 import { ReactJSONEditor } from "./ReactJSONEditor";
@@ -64,28 +64,40 @@ export function JsonView() {
 
   return (
     <section>
-      <div className="d-flex flex-wrap align-items-center my-1 ms-2">
-        <label htmlFor="searchElementInput">
-          <ThemeIconProvider>
-            <FiSearch />
-          </ThemeIconProvider>
-        </label>
-        <input
-          className="form-control form-control-sm mx-2"
-          id="searchElementInput"
-          style={{ width: "fit-content" }}
-          ref={searchRef}
-          type="text"
-          placeholder={`Search in the ${
-            isResponseDisplayed ? "response" : "request"
-          }`}
-          onKeyUp={(e) => {
-            if (e.key === "Enter" && searchRef.current.value !== "") {
-              addSearchTerm(searchRef.current.value);
-              searchRef.current.value = "";
-            }
-          }}
-        />
+      <div className="d-flex flex-wrap align-items-center my-1 ms-1 row-gap-1">
+        <div className="input-group me-2" style={{ width: "auto" }}>
+          <button
+            className="input-group-text btn btn btn-sm btn-secondary icon-btn"
+            id="searchThisElement"
+            onClick={() => {
+              if (searchRef.current.value !== "") {
+                addSearchTerm(searchRef.current.value);
+                searchRef.current.value = "";
+              }
+            }}
+            title="Search this element"
+          >
+            <ThemeIconProvider>
+              <FiSearch />
+            </ThemeIconProvider>
+          </button>
+          <input
+            className="form-control form-control-sm"
+            id="searchElementInput"
+            style={{ width: "fit-content" }}
+            ref={searchRef}
+            type="text"
+            placeholder={`Search in the ${
+              isResponseDisplayed ? "response" : "request"
+            }`}
+            onKeyUp={(e) => {
+              if (e.key === "Enter" && searchRef.current.value !== "") {
+                addSearchTerm(searchRef.current.value);
+                searchRef.current.value = "";
+              }
+            }}
+          />
+        </div>
         {searchedValue !== "" && (
           <span className="ms-1 me-1">
             Current:{" "}
@@ -134,7 +146,7 @@ export function JsonView() {
           ))}
       </div>
 
-      <section className="mb-1 ms-1">
+      <section className="mb-1 ms-1 d-flex">
         <div
           className="btn-group me-1"
           role="group"
@@ -188,33 +200,34 @@ export function JsonView() {
           <MdOutlineExpand />
         </button>
         {selectedElement !== "" && (
-          <span>
+          <div className="d-flex align-items-center ms-2 flex-fill me-2">
             Selected:
-            <div
-              className="input-group ms-2"
-              style={{ display: "inline-flex", maxWidth: "250px" }}
-            >
-              <input
-                type="text"
-                readOnly
-                className="form-control form-control-sm"
-                value={selectedElement}
-                aria-label={selectedElement}
-                aria-describedby="basic-addon2"
-                style={{ textOverflow: "ellipsis" }}
-              />
+            <div className="input-group ms-2" style={{ maxWidth: "350px" }}>
               <button
                 className="input-group-text btn btn btn-sm btn-secondary icon-btn"
-                id="basic-addon2"
+                id="searchThisElement"
                 onClick={() => addSearchTerm(selectedElement)}
-                title="Click to search for the selected element"
+                title="Search this element"
               >
                 <ThemeIconProvider>
-                  <FiPlus />
+                  <FiSearch />
                 </ThemeIconProvider>
               </button>
+              <input
+                type="text"
+                style={{
+                  borderBottom: "solid grey 1px",
+                  textOverflow: "ellipsis",
+                }}
+                readOnly
+                className="form-control form-control-sm form-control-plaintext ps-2"
+                value={selectedElement}
+                title={selectedElement}
+                aria-label={selectedElement}
+                aria-describedby="searchThisElement"
+              />
             </div>
-          </span>
+          </div>
         )}
       </section>
 
